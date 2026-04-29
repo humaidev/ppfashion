@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-gold: #C2027A;
+  --color-primary-gold-dark: #9a0160;
+  --color-secondary-emerald: #006D5B;
+  --color-secondary-emerald-dark: #004D40;
+  --color-luxury-black: #0F0F0F;
+  --color-warm-ivory: #F8F1E9;
+  --color-soft-gray: #E5E5E5;
+  --color-vibrant-gold: #e0038c;
+
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Outfit", sans-serif;
+}
+
+:root {
+  --background: #F8F1E9;
+  --foreground: #0F0F0F;
+  --primary: #C2027A;
+  --secondary: #7e1d91;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0F0F0F;
+    --foreground: #FFFFFF;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #eb0291 0%, #7e1d91 100%);
+}
+
+.emerald-gradient {
+  background: linear-gradient(135deg, #006D5B 0%, #004D40 100%);
+}
+
+.gold-emerald-gradient {
+  background: linear-gradient(135deg, #eb0291 0%, #7e1d91 100%);
+}
+
+.brand-gradient {
+  background: linear-gradient(135deg, #eb0291 0%, #7e1d91 100%);
+}
+
+.brand-gradient-hover:hover {
+  background: linear-gradient(135deg, #d4027f 0%, #6a1879 100%);
+}
+
+.glass-morphism {
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(194, 2, 122, 0.15);
+}
+
+.text-soft {
+  color: #E5E5E5;
+}
+
+.nav-link-hover {
+  position: relative;
+}
+
+.nav-link-hover::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: -4px;
+  left: 0;
+  background-color: #C2027A;
+  transition: width 0.3s ease;
+}
+
+.nav-link-hover:hover::after {
+  width: 100%;
+}
+
+/* ── Brand Gradient & Glow Effect ── */
+.gradient-text,
+[class*="text-primary-gold"] {
+  background: linear-gradient(135deg, #eb0291 0%, #7e1d91 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  /* Subtler white glow for individual character definition */
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.25));
+  letter-spacing: 0.05em;
+}
