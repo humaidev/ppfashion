@@ -71,7 +71,7 @@ h6 {
 
 .brand-gradient-hover:hover {
   background: linear-gradient(135deg, #846830 0%, #C6A55C 50%, #D4AF37 100%) !important;
-  box-shadow: 0 0 30px rgba(198, 165, 92, 0.5) !important;
+  box-shadow: 0 0 20px rgba(198, 165, 92, 0.3) !important;
   color: white !important;
 }
 
