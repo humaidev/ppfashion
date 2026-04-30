@@ -29,34 +29,37 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-          ? "bg-white shadow-lg border-b border-black/5 py-3"
-          : "bg-white py-6"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 flex items-center ${isScrolled
+          ? "bg-luxury-black/95 backdrop-blur-md shadow-2xl border-b border-secondary-emerald/20 h-[100px]"
+          : "bg-transparent h-[100px]"
           }`}
       >
-        <div className="container mx-auto px-6 flex justify-between items-center">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 hover:opacity-90 transition-opacity duration-300 transform hover:scale-105"
-          >
-            <Image
-              src="/pp.png"
-              alt="PPFashion Logo"
-              width={140}
-              height={35}
-              className="object-contain md:w-[170px]"
-              priority
-            />
-          </Link>
+        <div className="container mx-auto px-6 flex justify-between items-center h-full">
+          {/* Logo Container */}
+          <div className="flex items-center h-full relative -top-2">
+            <Link
+              href="/"
+              className="flex items-center hover:opacity-100 transition-opacity duration-300"
+            >
+              <Image
+                src="/logo.png"
+                alt="PPFashion Logo"
+                width={500}
+                height={200}
+                className="object-contain w-auto h-[80px] md:h-[90px]"
+                priority
+                unoptimized
+              />
+            </Link>
+          </div>
 
           {/* Desktop Links */}
-          <div className="hidden xl:flex items-center space-x-8">
+          <div className="hidden xl:flex items-center space-x-8 relative -top-2">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="nav-link-hover text-[11px] font-bold hover:text-primary-gold transition-colors uppercase tracking-[0.2em] text-black/80"
+                className={`nav-link-hover text-[13px] font-bold hover:text-primary-gold transition-colors uppercase tracking-[0.2em] ${isScrolled ? "text-white/90" : "text-white"}`}
               >
                 {link.name}
               </Link>
@@ -64,24 +67,24 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden xl:flex items-center space-x-4">
+          <div className="hidden xl:flex items-center space-x-4 relative -top-2">
             <Link
               href="/login"
-              className="text-[11px] font-bold text-black/70 hover:text-black transition-all px-4 py-2 border border-black/20 hover:border-black/60 rounded-sm uppercase tracking-widest"
+              className={`text-[11px] font-bold transition-all px-4 py-2 border rounded-sm uppercase tracking-widest ${isScrolled ? "text-white/70 border-white/20 hover:text-white hover:border-white/60" : "text-white border-white/30 hover:border-white/80"}`}
             >
               Log in
             </Link>
             <Link
               href="/membership"
-              className="brand-gradient brand-gradient-hover text-white font-bold py-3 px-8 rounded-sm transition-all shadow-[0_0_20px_rgba(194,2,122,0.3)] active:scale-95 uppercase text-[10px] tracking-[0.2em]"
+              className="brand-gradient brand-gradient-hover text-white font-bold py-3 px-8 rounded-sm transition-all shadow-[0_0_20px_rgba(0,79,52,0.3)] active:scale-95 uppercase text-[10px] tracking-[0.2em]"
             >
               Become a Member
             </Link>
           </div>
 
           {/* Mobile Toggle */}
-          <button 
-            className="xl:hidden text-black p-2 hover:bg-black/5 rounded-full transition-all"
+          <button
+            className="xl:hidden text-white p-2 hover:bg-white/5 rounded-full transition-all relative -top-2"
             onClick={() => setIsMenuOpen(true)}
           >
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,14 +98,14 @@ export default function Navbar() {
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
               onClick={() => setIsMenuOpen(false)}
             />
-            <motion.div 
+            <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -112,7 +115,9 @@ export default function Navbar() {
             >
               <div className="flex flex-col h-full p-8">
                 <div className="flex justify-between items-center mb-16">
-                  <Image src="/pp.png" alt="Logo" width={120} height={30} className="object-contain" />
+                  <div className="bg-white p-1 rounded-sm">
+                    <Image src="/logo.jpeg" alt="Logo" width={120} height={30} className="object-contain mix-blend-multiply" />
+                  </div>
                   <button onClick={() => setIsMenuOpen(false)} className="text-black p-2 hover:bg-black/5 rounded-full transition-colors">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />

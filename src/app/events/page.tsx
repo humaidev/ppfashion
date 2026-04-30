@@ -69,7 +69,7 @@ export default function EventsPage() {
                     <div className="absolute top-8 right-8 z-20">
                       <motion.span 
                         whileHover={{ scale: 1.05 }}
-                        className="brand-gradient text-white text-[9px] font-black uppercase tracking-widest px-6 py-2 shadow-[0_0_20px_rgba(194,2,122,0.4)]"
+                        className="brand-gradient text-white text-[9px] font-black uppercase tracking-widest px-6 py-2 shadow-[0_0_20px_rgba(0,79,52,0.4)]"
                       >
                         {event.status}
                       </motion.span>

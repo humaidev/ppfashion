@@ -15,7 +15,7 @@ export default function AboutPage() {
           />
         </div>
         <AnimatedSection className="container mx-auto px-6 text-center relative z-10">
-          <h1 className="text-primary-gold font-bold uppercase tracking-[0.4em] mb-6 text-[10px] md:text-sm">Our Story</h1>
+          <h1 className="gold-gradient-text font-bold uppercase tracking-[0.4em] mb-6 text-[10px] md:text-sm">Our Story</h1>
           <h2 className="text-4xl md:text-8xl font-serif font-bold text-white tracking-tighter">Pakistani Passion <br/>for Fashion</h2>
         </AnimatedSection>
       </section>
@@ -34,7 +34,7 @@ export default function AboutPage() {
           </AnimatedSection>
           
           <AnimatedSection className="border-l-2 border-primary-gold/20 pl-6 md:pl-12" delay={0.2}>
-            <h3 className="text-3xl md:text-5xl font-serif font-bold mb-10 text-white tracking-tight italic">Elevating South Asian Heritage</h3>
+            <h3 className="text-3xl md:text-5xl font-serif font-bold mb-10 gold-gradient-text tracking-tight italic">Elevating South Asian Heritage</h3>
             <p className="text-xl text-white/60 mb-10 leading-relaxed font-medium">
               Pakistani Passion for Fashion was born out of a desire to create a permanent, 
               prestigious digital home for South Asian fashion talent. 
@@ -73,7 +73,7 @@ export default function AboutPage() {
               { title: "Legacy", desc: "Preserving cultural heritage for future designers." }
             ].map((item, i) => (
               <AnimatedSection key={i} delay={i * 0.2} className="group p-12 border border-white/5 hover:border-primary-gold/30 transition-all duration-500 bg-luxury-black/50 backdrop-blur-sm">
-                <h5 className="text-3xl font-serif font-bold mb-6 text-primary-gold group-hover:italic transition-all">{item.title}</h5>
+                <h5 className="text-3xl font-serif font-bold mb-6 gold-gradient-text group-hover:italic transition-all">{item.title}</h5>
                 <p className="text-white/50 leading-relaxed text-sm font-medium">{item.desc}</p>
               </AnimatedSection>
             ))}

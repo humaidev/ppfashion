@@ -14,11 +14,12 @@ export default function Footer() {
           <div className="lg:col-span-5">
             <Link href="/" className="inline-block mb-8 hover:opacity-80 transition-all origin-left">
               <Image
-                src="/icon.png"
+                src="/logo.png"
                 alt="PPFashion Logo"
-                width={160}
-                height={40}
+                width={200}
+                height={60}
                 className="object-contain"
+                unoptimized
               />
             </Link>
             <p className="text-white/40 max-w-sm mb-10 leading-relaxed text-sm font-medium italic">
@@ -31,7 +32,7 @@ export default function Footer() {
             </div>
             <Link
               href="/membership"
-              className="brand-gradient brand-gradient-hover inline-block text-white font-bold py-4 px-10 rounded-sm transition-all shadow-xl uppercase text-[9px] tracking-[0.3em]"
+              className="brand-gradient brand-gradient-hover inline-block text-white font-bold py-4 px-10 rounded-sm transition-all shadow-xl shadow-secondary-emerald/20 uppercase text-[9px] tracking-[0.3em]"
             >
               Become a Member
             </Link>
@@ -41,7 +42,7 @@ export default function Footer() {
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-12 sm:gap-8">
             {/* The Collective */}
             <div>
-              <h3 className="text-[10px] font-bold text-primary-gold uppercase tracking-[0.4em] mb-8 pb-2 border-b border-primary-gold/10">The Collective</h3>
+              <h3 className="text-[12px] font-black gold-gradient-text uppercase tracking-[0.4em] mb-8 pb-2 border-b border-primary-gold/20 drop-shadow-[0_0_10px_rgba(198,165,92,0.4)]">The Collective</h3>
               <ul className="space-y-4">
                 {[
                   { name: 'Our Story', href: '/about' },
@@ -62,7 +63,7 @@ export default function Footer() {
 
             {/* Contact Registry */}
             <div>
-              <h3 className="text-[10px] font-bold text-primary-gold uppercase tracking-[0.4em] mb-8 pb-2 border-b border-primary-gold/10">Registry</h3>
+              <h3 className="text-[12px] font-black gold-gradient-text uppercase tracking-[0.4em] mb-8 pb-2 border-b border-primary-gold/20 drop-shadow-[0_0_10px_rgba(198,165,92,0.4)]">Registry</h3>
               <div className="space-y-8">
                 <div>
                   <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em] mb-2">Global Headquarters</p>

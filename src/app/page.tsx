@@ -44,16 +44,16 @@ export default function Home() {
             transition={{ duration: 1, ease: "easeOut" }}
             className="max-w-4xl"
           >
-            <h2 className="text-primary-gold font-bold uppercase tracking-[0.4em] mb-6 text-[10px] md:text-sm">
+            <h2 className="text-white font-bold uppercase tracking-[0.4em] mb-6 text-[10px] md:text-sm">
               The Official Home of Pakistani Designers
             </h2>
-            <h1 className="text-5xl md:text-[9rem] font-serif font-bold text-white mb-10 leading-[0.85] tracking-tighter">
-              Couture <br />
+            <h1 className="text-5xl md:text-[9.5rem] font-serif font-bold mb-10 leading-[0.85] tracking-tighter">
+              <span className="text-white inline-block">Couture</span> <br />
               <motion.span 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 1 }}
-                className="text-primary-gold italic font-light inline-block"
+                className="gold-gradient-text inline-block italic font-light drop-shadow-[0_0_15px_rgba(198,165,92,0.3)]"
               >
                 Excellence.
               </motion.span>
@@ -65,7 +65,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-8 mb-16">
               <Link
                 href="/membership"
-                className="brand-gradient brand-gradient-hover text-white text-center font-bold py-5 px-12 rounded-sm transition-all transform hover:scale-105 active:scale-95 uppercase tracking-[0.2em] text-sm shadow-[0_0_30px_rgba(194,2,122,0.3)]"
+                className="brand-gradient brand-gradient-hover text-white text-center font-bold py-5 px-12 rounded-sm transition-all transform hover:scale-105 active:scale-95 uppercase tracking-[0.2em] text-sm shadow-[0_0_30px_rgba(0,79,52,0.3)]"
               >
                 Become a Member
               </Link>
@@ -133,7 +133,7 @@ export default function Home() {
               { label: "Global Reach", val: "10k+" },
             ].map((stat, i) => (
               <motion.div key={i} variants={itemVariants} className="flex flex-col items-center border-r border-white/5 lg:last:border-0">
-                <div className="text-5xl md:text-8xl font-serif font-bold text-primary-gold mb-4 tracking-tighter">{stat.val}</div>
+                <div className="text-5xl md:text-8xl font-serif font-bold gold-gradient-text mb-4 tracking-tighter">{stat.val}</div>
                 <div className="text-white/60 uppercase tracking-[0.4em] text-[9px] font-black">{stat.label}</div>
               </motion.div>
             ))}
@@ -146,11 +146,14 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <AnimatedSection className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-32 gap-12">
             <div className="max-w-4xl">
-              <h2 className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[10px] mb-8">The Designer Collective</h2>
-              <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-serif font-bold text-white leading-[1.1] md:leading-[1] tracking-tighter">High Fashion <br className="hidden sm:block" /> Visionaries</h3>
+              <h2 className="text-white inline-block font-bold uppercase tracking-[0.4em] text-[10px] mb-8">The Designer Collective</h2>
+              <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-serif font-bold text-white leading-[1.1] md:leading-[1] tracking-tighter">
+                <span className="text-white inline-block">High Fashion</span> <br className="hidden sm:block" /> 
+                <span className="text-white">Visionaries</span>
+              </h3>
             </div>
-            <Link href="/designers" className="text-primary-gold hover:text-white font-bold uppercase tracking-[0.3em] text-[10px] flex items-center group transition-all pt-4 lg:pt-0 border-b border-primary-gold/20 pb-2 hover:border-white">
-              Explore the full collective <span className="ml-4 group-hover:translate-x-3 transition-transform text-lg">→</span>
+            <Link href="/designers" className="gold-gradient-text hover:opacity-80 font-bold uppercase tracking-[0.3em] text-[10px] flex items-center group transition-all pt-4 lg:pt-0 border-b border-secondary-emerald/20 pb-2 hover:border-primary-gold">
+              Explore the full collective <span className="ml-4 group-hover:translate-x-3 transition-transform text-lg text-primary-gold">→</span>
             </Link>
           </AnimatedSection>
 
@@ -161,7 +164,7 @@ export default function Home() {
               { name: "Hassan Sheheryar", type: "Men's Formal", img: "/runway-bridal-1.jpg", loc: "Dubai, UAE" },
             ].map((designer, i) => (
               <AnimatedSection key={i} delay={i * 0.2}>
-                <div className="group cursor-pointer relative">
+                <div className="group cursor-pointer">
                   <div className="relative aspect-[4/5] overflow-hidden mb-10 transition-all duration-700 shadow-2xl group-hover:shadow-primary-gold/10">
                     <div className="absolute inset-0 bg-luxury-black/40 group-hover:bg-transparent transition-all z-10 duration-700"></div>
                     <Image
@@ -184,7 +187,7 @@ export default function Home() {
                   <div className="flex justify-between items-start border-l-2 border-primary-gold/20 pl-6 group-hover:border-primary-gold transition-colors duration-500">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className="text-2xl font-serif font-bold text-white uppercase tracking-tight group-hover:text-primary-gold transition-colors">{designer.name}</h4>
+                        <h4 className="text-2xl font-serif font-bold gold-gradient-text uppercase tracking-tight transition-colors">{designer.name}</h4>
                         <svg className="w-4 h-4 text-secondary-emerald" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
@@ -204,12 +207,12 @@ export default function Home() {
         <AnimatedSection className="container mx-auto px-6 relative z-10 text-center max-w-5xl">
           <h2 className="text-5xl md:text-[7rem] font-serif font-bold text-white mb-12 leading-[0.9] tracking-tighter">
             Build Your <br /> 
-            <span className="text-primary-gold italic font-light">Legacy.</span>
+            <span className="gold-gradient-text italic font-light">Legacy.</span>
           </h2>
           <div className="flex flex-col items-center gap-8">
             <Link
               href="/membership"
-              className="brand-gradient brand-gradient-hover text-white font-bold py-7 px-8 md:px-24 rounded-sm transition-all transform hover:scale-105 uppercase tracking-[0.4em] text-[10px] md:text-xs shadow-[0_0_60px_rgba(194,2,122,0.15)]"
+              className="brand-gradient brand-gradient-hover text-white font-bold py-7 px-8 md:px-24 rounded-sm transition-all transform hover:scale-105 uppercase tracking-[0.4em] text-[10px] md:text-xs shadow-[0_0_60px_rgba(0,79,52,0.15)]"
             >
               Apply for Exclusive Membership
             </Link>

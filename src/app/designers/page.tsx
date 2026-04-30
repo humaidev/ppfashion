@@ -79,7 +79,7 @@ export default function DesignersPage() {
                   <div className="flex justify-between items-start border-l-2 border-primary-gold/20 pl-6 group-hover:border-primary-gold transition-colors duration-500">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className="text-2xl md:text-3xl font-serif font-bold text-white uppercase tracking-tight group-hover:text-primary-gold transition-colors group-hover:italic duration-500">{designer.name}</h4>
+                        <h4 className="text-2xl md:text-3xl font-serif font-bold gold-gradient-text uppercase tracking-tight group-hover:italic duration-500">{designer.name}</h4>
                         <motion.svg 
                           whileHover={{ scale: 1.2, rotate: 360 }}
                           className="w-4 h-4 text-secondary-emerald" fill="currentColor" viewBox="0 0 20 20"
