@@ -106,17 +106,17 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             />
             <motion.div
-              initial={{ x: "100%" }}
+              initial={{ x: "-100%" }}
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
+              exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-[85%] max-w-sm bg-white shadow-2xl z-[110]"
+              className="fixed top-0 left-0 h-full w-[85%] max-w-sm bg-white shadow-2xl z-[110] overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col h-full p-8">
-                <div className="flex justify-between items-center mb-16">
+                <div className="flex justify-between items-center mb-10">
                   <div className="bg-white p-1 rounded-sm">
-                    <Image src="/logo.jpeg" alt="Logo" width={120} height={30} className="object-contain mix-blend-multiply" />
+                    <Image src="/pp.jpeg" alt="Logo" width={130} height={30} className="object-contain mix-blend-multiply" />
                   </div>
                   <button onClick={() => setIsMenuOpen(false)} className="text-black p-2 hover:bg-black/5 rounded-full transition-colors">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +125,7 @@ export default function Navbar() {
                   </button>
                 </div>
 
-                <div className="flex flex-col space-y-8 mb-auto overflow-y-auto pr-4">
+                <div className="flex flex-col space-y-8 mb-auto pr-4">
                   {navLinks.map((link) => (
                     <Link
                       key={link.name}

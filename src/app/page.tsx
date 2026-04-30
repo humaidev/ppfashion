@@ -38,31 +38,31 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
             className="max-w-4xl"
           >
-            <h2 className="text-white font-bold uppercase tracking-[0.4em] mb-6 text-[10px] md:text-sm">
+            <h2 className="text-white font-bold uppercase tracking-[0.4em] mb-1 md:mb-4 text-[10px] md:text-sm opacity-80">
               The Official Home of Pakistani Designers
             </h2>
-            <h1 className="text-5xl md:text-[9.5rem] font-serif font-bold mb-10 leading-[0.85] tracking-tighter">
+            <h1 className="text-7xl md:text-[9.5rem] font-serif font-bold mb-4 md:mb-6 leading-[0.8] md:leading-[0.8] tracking-tighter">
               <span className="text-white inline-block">Couture</span> <br />
-              <motion.span 
+              <motion.span
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 1 }}
-                className="gold-gradient-text inline-block italic font-light drop-shadow-[0_0_15px_rgba(198,165,92,0.3)]"
+                className="gold-gradient-text inline-block italic font-bold drop-shadow-[0_0_20px_rgba(198,165,92,0.5)]"
               >
                 Excellence.
               </motion.span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-2xl leading-relaxed">
-              Join the elite circle of 50+ leading designers. Unlock priority access to 
+            <p className="text-lg md:text-2xl text-white/90 mb-6 md:mb-8 max-w-2xl leading-relaxed">
+              Join the elite circle of 50+ leading designers. Unlock priority access to
               runway shows, global networking, and exclusive opportunities.
             </p>
-            <div className="flex flex-col sm:flex-row gap-8 mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-8 mb-10 md:mb-12">
               <Link
                 href="/membership"
                 className="brand-gradient brand-gradient-hover text-white text-center font-bold py-5 px-12 rounded-sm transition-all transform hover:scale-105 active:scale-95 uppercase tracking-[0.2em] text-sm shadow-[0_0_30px_rgba(0,79,52,0.3)]"
@@ -76,12 +76,12 @@ export default function Home() {
                 View Events
               </Link>
             </div>
-            
-            <div className="border-l border-primary-gold/30 pl-8">
+
+            <div className="w-full border-t border-primary-gold/20 md:border-t-0 md:border-l md:pl-8 pt-8 md:pt-0 mt-10 md:mt-0">
               <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 mb-6">Established Presence Across</p>
               <div className="flex flex-wrap gap-x-12 gap-y-4 text-[10px] font-black text-white/60 uppercase tracking-[0.3em]">
                 {["London", "Glasgow", "Manchester", "Dubai", "Lahore"].map((city, idx) => (
-                  <motion.span 
+                  <motion.span
                     key={city}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -96,8 +96,8 @@ export default function Home() {
           </motion.div>
         </div>
 
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
-          <motion.div 
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 hidden md:block">
+          <motion.div
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
             className="w-px h-16 bg-gradient-to-b from-primary-gold to-transparent"
@@ -119,7 +119,7 @@ export default function Home() {
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
-          <motion.div 
+          <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -148,7 +148,7 @@ export default function Home() {
             <div className="max-w-4xl">
               <h2 className="text-white inline-block font-bold uppercase tracking-[0.4em] text-[10px] mb-8">The Designer Collective</h2>
               <h3 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-serif font-bold text-white leading-[1.1] md:leading-[1] tracking-tighter">
-                <span className="text-white inline-block">High Fashion</span> <br className="hidden sm:block" /> 
+                <span className="text-white inline-block">High Fashion</span> <br className="hidden sm:block" />
                 <span className="text-white">Visionaries</span>
               </h3>
             </div>
@@ -206,7 +206,7 @@ export default function Home() {
       <section className="py-48 bg-luxury-black relative overflow-hidden border-t border-white/5">
         <AnimatedSection className="container mx-auto px-6 relative z-10 text-center max-w-5xl">
           <h2 className="text-5xl md:text-[7rem] font-serif font-bold text-white mb-12 leading-[0.9] tracking-tighter">
-            Build Your <br /> 
+            Build Your <br />
             <span className="gold-gradient-text italic font-light">Legacy.</span>
           </h2>
           <div className="flex flex-col items-center gap-8">
