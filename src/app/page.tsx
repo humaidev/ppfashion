@@ -77,19 +77,23 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="w-full border-t border-primary-gold/20 md:border-t-0 md:border-l md:pl-8 pt-8 md:pt-0 mt-10 md:mt-0">
-              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/30 mb-6">Established Presence Across</p>
-              <div className="flex flex-wrap gap-x-12 gap-y-4 text-[10px] font-black text-white/60 uppercase tracking-[0.3em]">
+            <div className="w-full border-t border-primary-gold/20 md:border-t-0 md:border-l md:pl-8 pt-10 md:pt-0 mt-12 md:mt-0 flex flex-col items-center md:items-start">
+              <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 mb-8 md:mb-6">Established Presence Across</p>
+              <div className="grid grid-cols-2 md:flex md:flex-wrap gap-x-8 md:gap-x-12 gap-y-8 md:gap-y-4 text-[11px] md:text-[10px] font-black text-white/80 uppercase tracking-[0.4em] w-full max-w-[320px] md:max-w-none">
                 {["London", "Glasgow", "Manchester", "Dubai", "Lahore"].map((city, idx) => (
-                  <motion.span
+                  <motion.div
                     key={city}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1 + (idx * 0.1) }}
-                    className="hover:text-primary-gold transition-colors cursor-default"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + (idx * 0.1) }}
+                    viewport={{ once: true }}
+                    className={`flex items-center justify-center md:justify-start ${idx === 4 ? 'col-span-2' : ''}`}
                   >
-                    {city}
-                  </motion.span>
+                    <span className="relative group cursor-default transition-colors hover:text-primary-gold">
+                      {city}
+                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 w-0 h-[1px] bg-primary-gold/50 transition-all duration-300 group-hover:w-full"></span>
+                    </span>
+                  </motion.div>
                 ))}
               </div>
             </div>
