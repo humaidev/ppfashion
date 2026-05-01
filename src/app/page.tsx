@@ -45,7 +45,7 @@ export default function Home() {
             className="max-w-4xl"
           >
             <h2 className="text-white font-bold uppercase tracking-[0.4em] mb-1 md:mb-4 text-[10px] md:text-sm opacity-80">
-              The Official Home of Pakistani Designers
+              Membership Program
             </h2>
             <h1 className="text-7xl md:text-[9.5rem] font-serif font-bold mb-4 md:mb-6 leading-[0.8] md:leading-[0.8] tracking-tighter">
               <span className="text-white inline-block">Couture</span> <br />
