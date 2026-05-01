@@ -25,7 +25,7 @@ export async function GET() {
     }
 
     const kycApplications = await User.find({ 
-      kycStatus: { $ne: KYCStatus.NOT_STARTED } 
+      kycStatus: { $ne: KYCStatus.NOT_SUBMITTED } 
     }).select('-password').sort({ updatedAt: -1 });
 
     return NextResponse.json({ success: true, applications: kycApplications });
