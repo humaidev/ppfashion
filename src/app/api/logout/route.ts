@@ -13,5 +13,12 @@ export async function POST() {
     maxAge: 0 // Expire immediately
   });
 
+  // Clear the user_token cookie
+  response.cookies.set('user_token', '', {
+    httpOnly: true,
+    path: '/',
+    maxAge: 0 // Expire immediately
+  });
+
   return response;
 }

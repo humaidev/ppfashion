@@ -1,107 +1,117 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const tiers = [
-  {
-    name: "Basic",
-    price: "£19",
-    yearlyPrice: "£199",
-    description: "Perfect for emerging designers looking for visibility.",
-    features: [
-      "Portfolio Profile",
-      "Directory Listing",
-      "Event Updates",
-      "Digital Member Badge",
-      "Access to Public Forums",
-    ],
-    cta: "Join Basic",
-    popular: false,
-    color: "bg-soft-gray",
-  },
-  {
-    name: "Premium",
-    price: "£49",
-    yearlyPrice: "£499",
-    description: "For established designers wanting priority growth.",
-    features: [
-      "Featured Homepage Spot",
-      "Priority Event Application",
-      "Private Community Access",
-      "Monthly Growth Webinars",
-      "Supplier Lists Access",
-      "Silver Member Badge",
-    ],
-    cta: "Join Premium",
-    popular: true,
-    color: "bg-primary-gold",
-  },
-  {
-    name: "Elite",
-    price: "£99",
-    yearlyPrice: "£999",
-    description: "The ultimate tier for industry leaders.",
-    features: [
-      "VIP Event Invites",
-      "1-on-1 Mentoring",
-      "PR & Media Features",
-      "Custom Landing Page",
-      "Runway Priority Slot",
-      "Gold Member Badge",
-      "Full Resource Access",
-    ],
-    cta: "Go Elite",
-    popular: false,
-    color: "bg-secondary-emerald",
-  },
-];
-
 export default function MembershipPage() {
+  const [user, setUser] = useState<any>(null);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const profileRes = await fetch("/api/auth/profile");
+        const profileData = await profileRes.json();
+        if (profileData.success) setUser(profileData.user);
+
+        const plansRes = await fetch("/api/plans");
+        const plansData = await plansRes.json();
+        if (plansData.success) setPlans(plansData.plans);
+      } catch (err) {
+        console.error("Data fetch failed");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handlePurchase = async (plan: any) => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    if (user.kycStatus !== 'APPROVED') {
+      router.push("/dashboard");
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const res = await fetch("/api/membership/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId: plan._id, planName: plan.name }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`${plan.name} activated successfully!`);
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      alert("Purchase failed");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-primary-gold border-t-transparent rounded-full animate-spin"></div></div>;
+
   return (
-    <div className="bg-luxury-black min-h-screen py-32 pb-40">
-      <div className="container mx-auto px-6">
-        <div className="max-w-4xl mb-20 md:mb-32 border-l-2 border-primary-gold/20 pl-6 md:pl-10">
-          <h1 className="gold-gradient-text font-bold uppercase tracking-[0.4em] mb-6 text-[10px]">Membership Tiers</h1>
-          <h2 className="text-4xl md:text-[7rem] font-serif font-bold text-white mb-10 leading-[0.9] tracking-tighter">Elevate Your <br />Presence</h2>
-          <p className="text-xl text-white/50 leading-relaxed max-w-2xl">
-            Choose the tier that matches your ambition. Join a community of excellence 
-            and unlock exclusive opportunities in the global Pakistani fashion industry.
+    <div className="bg-black min-h-screen py-32 pb-40 text-white">
+      <div className="container mx-auto px-6 max-w-7xl">
+        <div className="max-w-4xl mb-24 border-l-2 border-primary-gold/20 pl-10">
+          <h1 className="gold-gradient-text font-bold uppercase tracking-[0.4em] mb-6 text-[10px]">Exclusive Access</h1>
+          <h2 className="text-5xl md:text-8xl font-serif font-bold text-white mb-10 leading-[0.9] tracking-tighter uppercase italic">Choose Your <br />Plan</h2>
+          <p className="text-lg text-white/50 leading-relaxed max-w-2xl font-medium">
+            {user
+              ? `Welcome back, ${user.name}. Choose an industry-leading tier to activate your collective membership and scale your global presence.`
+              : "Join a community of excellence and unlock exclusive runway opportunities in the global fashion industry."
+            }
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {tiers.map((tier) => (
-            <div 
-              key={tier.name}
-              className={`relative flex flex-col p-12 rounded-sm transition-all duration-700 transform hover:-translate-y-4 group ${
-                tier.popular 
-                  ? "bg-white/[0.03] text-white border-2 border-secondary-emerald shadow-[0_0_80px_rgba(0,79,52,0.15)] scale-105 z-10" 
-                  : "bg-white/[0.02] backdrop-blur-sm border border-white/5 hover:border-secondary-emerald/30"
-              }`}
+        {user && user.kycStatus !== 'APPROVED' && (
+          <div className="mb-24 p-10 bg-red-500/5 border border-red-500/10 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.3em] font-black text-red-500 mb-2">Verification Required</p>
+              <p className="text-xs text-white/40 uppercase tracking-widest">You must have an approved KYC status to activate a membership tier.</p>
+            </div>
+            <Link href="/dashboard" className="border border-red-500/30 text-red-500 px-12 py-5 text-[9px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Verify Status</Link>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center items-stretch">
+          {plans.map((plan) => (
+            <div
+              key={plan._id}
+              className={`relative flex flex-col p-12 rounded-sm transition-all duration-700 bg-white/[0.02] border border-white/5 hover:border-primary-gold/50 group ${plan.isPopular ? 'ring-1 ring-primary-gold/30 shadow-[0_30px_100px_rgba(232,209,150,0.05)] scale-[1.02] z-10 bg-white/[0.04]' : ''}`}
             >
-              {tier.popular && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 brand-gradient text-white text-[10px] font-bold uppercase tracking-widest px-8 py-2 rounded-full shadow-2xl">
+              {plan.isPopular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary-gold text-luxury-black px-6 py-2 text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl">
                   Most Popular
                 </div>
               )}
 
               <div className="mb-12">
-                <h3 className="text-3xl font-serif font-bold mb-4 gold-gradient-text italic">
-                  {tier.name}
-                </h3>
+                <h3 className="text-4xl font-serif font-bold mb-6 italic text-white group-hover:gold-gradient-text transition-all">{plan.name}</h3>
                 <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-5xl font-bold tracking-tighter text-white">{tier.price}</span>
-                  <span className="text-sm uppercase tracking-widest opacity-40">/ Month</span>
+                  <span className="text-6xl font-bold tracking-tighter text-white">{plan.price}</span>
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-white/30 font-bold">/ {plan.interval === 'monthly' ? 'Month' : 'Year'}</span>
                 </div>
-                <p className="text-sm text-white/50 leading-relaxed font-medium">
-                  {tier.description}
-                </p>
+                <p className="text-xs text-white/40 leading-relaxed font-medium min-h-[48px]">{plan.description}</p>
               </div>
 
               <div className="flex-1 mb-12">
-                <ul className="space-y-5">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-4 text-xs font-medium text-white/70">
-                      <svg className={`w-5 h-5 flex-shrink-0 ${tier.popular ? "text-primary-gold" : "text-primary-gold/40"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                <ul className="space-y-6">
+                  {plan.features.map((feature: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-4 text-[11px] font-bold uppercase tracking-widest text-white/60">
+                      <svg className="w-4 h-4 flex-shrink-0 text-primary-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                       </svg>
                       {feature}
                     </li>
@@ -109,61 +119,75 @@ export default function MembershipPage() {
                 </ul>
               </div>
 
-              <Link
-                href={`/register?plan=${tier.name.toLowerCase()}`}
-                className={`text-center font-bold py-5 rounded-sm transition-all uppercase tracking-widest text-[10px] shadow-2xl ${
-                  tier.popular
-                    ? "brand-gradient text-white brand-gradient-hover"
-                    : "bg-white/5 text-white hover:brand-gradient"
-                }`}
-              >
-                {tier.cta}
-              </Link>
-              
-              <div className="mt-6 text-center">
-                <p className="text-[10px] opacity-20 uppercase tracking-[0.2em] font-bold">
-                  Or {tier.yearlyPrice} annually (save 15%)
-                </p>
+              <div className="space-y-6">
+                <button
+                  disabled={processing}
+                  onClick={() => handlePurchase(plan)}
+                  className={`w-full text-center font-black py-6 rounded-sm transition-all uppercase tracking-[0.3em] text-[10px] shadow-2xl brand-gradient brand-gradient-hover text-white hover:scale-[1.02] active:scale-[0.98] ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {processing ? "Initializing..." : user?.kycStatus === 'APPROVED' ? `Activate ${plan.name}` : "Become Member"}
+                </button>
+                {plan.interval === 'monthly' && (
+                  <p className="text-center text-[9px] uppercase tracking-widest text-white/20 font-bold">
+                    Or pay annually and save 15%
+                  </p>
+                )}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Benefits Table */}
-        <div className="mt-32 md:mt-48 overflow-x-auto bg-white/[0.01] border border-white/5 p-6 md:p-12">
-          <table className="w-full text-left border-collapse min-w-[600px]">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="py-12 px-8 font-serif text-2xl md:text-4xl font-bold uppercase tracking-tighter text-white italic w-[40%]">Capability Matrix</th>
-                <th className="py-12 px-8 text-center font-bold text-white/20 uppercase tracking-[0.3em] text-[10px] w-[20%]">Basic</th>
-                <th className="py-12 px-8 text-center font-bold text-white uppercase tracking-[0.3em] text-[10px] w-[20%]">Premium</th>
-                <th className="py-12 px-8 text-center font-bold text-white uppercase tracking-[0.3em] text-[10px] w-[20%]">Elite</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm">
-              {[
-                { label: "Elite Directory Profile", basic: true, premium: true, elite: true },
-                { label: "Runway Event Priority", basic: false, premium: "High", elite: "VIP Priority" },
-                { label: "Global PR Placements", basic: false, premium: "Monthly", elite: "Weekly Guaranteed" },
-                { label: "Private Networking Dinners", basic: false, premium: true, elite: true },
-                { label: "Dedicated Brand Landing Page", basic: false, premium: false, elite: true },
-                { label: "Wholesale Buyer Connections", basic: false, premium: false, elite: true },
-              ].map((row) => (
-                <tr key={row.label} className="border-b border-white/5 hover:bg-white/[0.02] transition-all group">
-                  <td className="py-10 px-8 font-bold uppercase tracking-[0.2em] text-[9px] text-white/40 group-hover:text-white transition-colors">{row.label}</td>
-                  <td className="py-10 px-8 text-center text-white/30">
-                    {row.basic === true ? <span className="text-xl">✓</span> : (row.basic === false ? "-" : <span className="font-bold tracking-widest uppercase text-[10px]">{row.basic}</span>)}
-                  </td>
-                  <td className="py-10 px-8 text-center text-white font-bold">
-                    {row.premium === true ? <span className="text-2xl">✓</span> : (row.premium === false ? "-" : <span className="font-bold tracking-widest uppercase text-[10px]">{row.premium}</span>)}
-                  </td>
-                  <td className="py-10 px-8 text-center text-white font-bold">
-                    {row.elite === true ? <span className="text-2xl">✓</span> : (row.elite === false ? "-" : <span className="font-bold tracking-widest uppercase text-[10px]">{row.elite}</span>)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Capability Matrix Section */}
+        <div className="mt-56 pt-32 border-t border-white/5">
+          <div className="max-w-xl mb-24">
+            <h3 className="text-5xl font-serif font-bold text-white uppercase italic tracking-tighter mb-4">Capability Matrix</h3>
+            <p className="text-[10px] uppercase tracking-[0.4em] text-primary-gold font-bold">Comprehensive Tier Comparison</p>
+          </div>
+
+          <div className="bg-white/[0.01] border border-white/5 p-4 md:p-12 rounded-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="py-12 text-[10px] font-black uppercase tracking-[0.4em] text-white/20 w-1/3">Service Deliverables</th>
+                    {plans.map(plan => (
+                      <th key={plan._id} className="py-12 text-center text-[11px] font-black uppercase tracking-[0.4em] text-primary-gold italic">{plan.name}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {[
+                    "Elite Directory Profile",
+                    "Runway Event Priority",
+                    "Global PR Placements",
+                    "Private Networking Dinners",
+                    "Dedicated Brand Landing Page",
+                    "Wholesale Buyer Connections",
+                    "VIP Mentoring Sessions",
+                    "Press Release Distribution"
+                  ].map((feature) => (
+                    <tr key={feature} className="group hover:bg-white/[0.02] transition-colors">
+                      <td className="py-10 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white transition-colors">{feature}</td>
+                      {plans.map(plan => {
+                        const hasFeature = plan.features.some((f: string) => f.toLowerCase().includes(feature.toLowerCase()) || feature.toLowerCase().includes(f.toLowerCase()));
+                        return (
+                          <td key={plan._id} className="py-10 text-center">
+                            {hasFeature ? (
+                              <svg className="w-6 h-6 mx-auto text-secondary-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <span className="text-white/5 text-2xl font-light">—</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -13,8 +13,8 @@ const initialDesigners = [
 ];
 
 const initialEvents = [
-  { title: "Glasgow Fashion Gala 2026", date: "June 15, 2026", location: "Glasgow Royal Concert Hall", type: "Fashion Show", image: "/vvip-event.jpg", status: "Applications Open", price: "From £45", description: "The premier event of the season." },
-  { title: "Pakistani Design Awards", date: "August 22, 2026", location: "London Hilton Park Lane", type: "Awards Ceremony", image: "/hero.png", status: "Tickets on Sale", price: "From £120", description: "Celebrating excellence in design." }
+  { title: "Glasgow Fashion Gala 2026", startDate: "2026-06-15", endDate: "2026-06-17", location: "Glasgow Royal Concert Hall", type: "Fashion Show", image: "/vvip-event.jpg", status: "Applications Open", price: "From £45", description: "The premier event of the season." },
+  { title: "Pakistani Design Awards", startDate: "2026-08-22", endDate: "2026-08-23", location: "London Hilton Park Lane", type: "Awards Ceremony", image: "/hero.png", status: "Tickets on Sale", price: "From £120", description: "Celebrating excellence in design." }
 ];
 
 export async function POST() {

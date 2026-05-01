@@ -22,3 +22,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    await dbConnect();
+    const { id, ...data } = await req.json();
+    const event = await Event.findByIdAndUpdate(id, data, { new: true });
+    return NextResponse.json({ success: true, event });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    await Event.findByIdAndDelete(id);
+    return NextResponse.json({ success: true, message: 'Event deleted' });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}

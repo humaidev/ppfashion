@@ -4,10 +4,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,6 +22,35 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("/api/auth/status");
+      const data = await res.json();
+      setIsLoggedIn(data.isLoggedIn);
+      setUserRole(data.role || 'DESIGNER');
+    } catch (err) {
+      setIsLoggedIn(false);
+      setUserRole(null);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+    setIsUserMenuOpen(false); // Close menu on route change
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+      setIsLoggedIn(false);
+      setIsUserMenuOpen(false);
+      router.push("/");
+      router.refresh(); // Clear client cache
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   const navLinks = [
     { name: "About", href: "/about" },
@@ -67,13 +102,58 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden xl:flex items-center space-x-4 relative -top-2">
-            <Link
-              href="/login"
-              className={`text-[11px] font-bold transition-all px-4 py-2 border rounded-sm uppercase tracking-widest ${isScrolled ? "text-white/70 border-white/20 hover:text-white hover:border-white/60" : "text-white border-white/30 hover:border-white/80"}`}
-            >
-              Log in
-            </Link>
+          <div className="hidden xl:flex items-center space-x-6 relative -top-2">
+            {isLoggedIn ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-3 group"
+                >
+                  <div className="w-10 h-10 rounded-full border border-primary-gold/30 flex items-center justify-center bg-white/5 group-hover:border-primary-gold transition-all overflow-hidden">
+                    <svg className="w-5 h-5 text-primary-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {isUserMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 mt-4 w-64 bg-luxury-black border border-white/10 shadow-2xl py-4 z-50"
+                    >
+                      {/* <div className="px-6 py-4 border-b border-white/5 mb-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-primary-gold">Member Menu</p>
+                      </div> */}
+                      <Link href="/dashboard" className="flex items-center px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/5 transition-all">
+                        Dashboard
+                      </Link>
+                      <Link href="/profile" className="flex items-center px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/5 transition-all">
+                        My Profile
+                      </Link>
+                      <Link href="/change-password" className="flex items-center px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/5 transition-all">
+                        Change Password
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left flex items-center px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-500/5 transition-all mt-2 border-t border-white/5"
+                      >
+                        Logout
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className={`text-[11px] font-bold transition-all px-4 py-2 border rounded-sm uppercase tracking-widest ${isScrolled ? "text-white/70 border-white/20 hover:text-white hover:border-white/60" : "text-white border-white/30 hover:border-white/80"}`}
+              >
+                Log in
+              </Link>
+            )}
             <Link
               href="/membership"
               className="brand-gradient brand-gradient-hover text-white font-bold py-3 px-8 rounded-sm transition-all shadow-[0_0_20px_rgba(0,79,52,0.3)] active:scale-95 uppercase text-[10px] tracking-[0.2em]"
@@ -139,7 +219,25 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex flex-col space-y-4 pt-10 border-t border-black/5 mt-8">
-                  <Link href="/login" className="w-full text-center text-sm font-bold text-black/70 py-4 border border-black/10 rounded-sm uppercase tracking-widest hover:bg-black/5 transition-all">Log in</Link>
+                  {isLoggedIn ? (
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-center text-sm font-bold text-red-500 py-4 border border-red-500/10 rounded-sm uppercase tracking-widest hover:bg-red-500/5 transition-all"
+                    >
+                      Logout
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="w-full text-center text-sm font-bold text-black/70 py-4 border border-black/10 rounded-sm uppercase tracking-widest hover:bg-black/5 transition-all"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Log in
+                    </Link>
+                  )}
                   <Link href="/membership" className="w-full text-center brand-gradient text-white font-bold py-5 rounded-sm uppercase tracking-widest text-[11px] shadow-lg shadow-primary-gold/20">Become a Member</Link>
                 </div>
               </div>
