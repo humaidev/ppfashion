@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import AnimatedSection from "@/components/AnimatedSection";
+import FeaturedDesignersList from "@/components/FeaturedDesignersList";
 
 export default function Home() {
   const containerVariants = {
@@ -109,6 +110,58 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Upcoming Event Section */}
+      <section className="py-24 bg-[#0A0A0A] relative overflow-hidden border-t border-white/5">
+        <div className="absolute inset-0 z-0 opacity-30">
+          <Image
+             src="/event-group.jpg"
+             alt="Upcoming Event"
+             fill
+             sizes="100vw"
+             className="object-cover grayscale"
+          />
+          <div className="absolute inset-0 bg-luxury-black/80"></div>
+        </div>
+        <div className="container mx-auto px-6 relative z-10">
+          <AnimatedSection className="border border-primary-gold/30 p-12 md:p-24 bg-luxury-black/60 backdrop-blur-md relative overflow-hidden group hover:border-primary-gold/60 transition-colors duration-500">
+             <div className="absolute top-0 right-0 p-6 md:p-10">
+               <span className="brand-gradient text-white text-[10px] font-black uppercase tracking-[0.4em] px-6 py-3 shadow-[0_0_30px_rgba(0,79,52,0.4)] block">
+                 June 6th - 7th, 2026
+               </span>
+             </div>
+             
+             <h3 className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[12px] mb-4">Pride of the Nation</h3>
+             <h2 className="text-4xl md:text-7xl font-serif font-bold text-white mb-6 leading-[1.1] tracking-tighter">
+               Fashion Show, <br className="hidden md:block"/>
+               <span className="italic font-light gold-gradient-text">Exhibition</span> & Award Ceremony
+             </h2>
+             <p className="text-white/70 max-w-2xl text-sm md:text-base font-medium mb-8">
+               A Global Celebration of Pakistani Excellence. An extraordinary fusion of fashion, recognition, culture, and business.
+             </p>
+             
+             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mt-8 border-t border-white/10 pt-8">
+               <div className="flex items-center gap-3 text-white/80 uppercase tracking-[0.3em] text-[11px] font-bold">
+                  <svg className="w-5 h-5 text-primary-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Glasgow Marriott Hotel, UK
+               </div>
+               <div className="hidden sm:block w-px h-8 bg-white/20"></div>
+               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 text-white uppercase tracking-[0.2em] text-[10px] font-bold">
+                 <span>Tickets: £100</span>
+                 <span className="hidden sm:block text-primary-gold">•</span>
+                 <span>Table (10): £900</span>
+               </div>
+               <div className="hidden sm:block w-px h-8 bg-white/20"></div>
+               <Link href="/events/glasgow-2026" className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-gold hover:text-white transition-colors flex items-center gap-2">
+                 View Details <span>→</span>
+               </Link>
+             </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -116,6 +169,7 @@ export default function Home() {
             src="/luxury_pakistani_fabric_bg_1777291822766.png"
             alt="Luxury Fabric Background"
             fill
+            sizes="100vw"
             className="object-cover brightness-[0.3]"
           />
           <div className="absolute inset-0 bg-luxury-black/60"></div>
@@ -161,48 +215,7 @@ export default function Home() {
             </Link>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {[
-              { name: "Ayesha Malik", type: "Bridal Couture", img: "/runway-red.jpg", loc: "London, UK" },
-              { name: "Zainab Chottani", type: "Luxury Pret", img: "/runway-couple.jpg", loc: "Karachi, PK" },
-              { name: "Hassan Sheheryar", type: "Men's Formal", img: "/runway-bridal-1.jpg", loc: "Dubai, UAE" },
-            ].map((designer, i) => (
-              <AnimatedSection key={i} delay={i * 0.2}>
-                <div className="group cursor-pointer">
-                  <div className="relative aspect-[4/5] overflow-hidden mb-10 transition-all duration-700 shadow-2xl group-hover:shadow-primary-gold/10">
-                    <div className="absolute inset-0 bg-luxury-black/40 group-hover:bg-transparent transition-all z-10 duration-700"></div>
-                    <Image
-                      src={designer.img}
-                      alt={designer.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 p-8 z-20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-luxury-black via-luxury-black/80 to-transparent">
-                      <span className="w-full brand-gradient text-white text-center font-bold py-4 uppercase tracking-widest text-[10px] block brand-gradient-hover transition-colors">
-                        View Exclusive Profile
-                      </span>
-                    </div>
-                    <div className="absolute top-6 left-6 z-20 flex gap-2">
-                      <span className="brand-gradient text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-[2px] shadow-lg">Elite Member</span>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-start border-l-2 border-primary-gold/20 pl-6 group-hover:border-primary-gold transition-colors duration-500">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <h4 className="text-2xl font-serif font-bold gold-gradient-text uppercase tracking-tight transition-colors">{designer.name}</h4>
-                        <svg className="w-4 h-4 text-secondary-emerald" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <p className="text-white/40 uppercase text-[9px] font-bold tracking-[0.3em]">{designer.type}</p>
-                    </div>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
+          <FeaturedDesignersList />
         </div>
       </section>
 

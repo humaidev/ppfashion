@@ -37,11 +37,21 @@ interface IEvent {
   image: string;
 }
 
+interface IBlog {
+  _id: string;
+  title: string;
+  excerpt: string;
+  author: string;
+  createdAt: string;
+  image: string;
+}
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'subscribers' | 'designers' | 'events' | 'kyc' | 'eventApps' | 'plans' | 'payments'>('subscribers');
+  const [activeTab, setActiveTab] = useState<'newsletter' | 'membership' | 'kyc' | 'eventApps' | 'designers' | 'payments' | 'events' | 'blogs' | 'plans'>('newsletter');
   const [subscribers, setSubscribers] = useState<ISubscriber[]>([]);
   const [designers, setDesigners] = useState<IDesigner[]>([]);
   const [events, setEvents] = useState<IEvent[]>([]);
+  const [blogs, setBlogs] = useState<IBlog[]>([]);
   const [kycApps, setKycApps] = useState<any[]>([]);
   const [eventApps, setEventApps] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
@@ -58,7 +68,8 @@ export default function AdminDashboard() {
 
   const [newDesigner, setNewDesigner] = useState({ name: '', specialty: '', tier: 'Premium', location: '', image: '' });
   const [newEvent, setNewEvent] = useState({ title: '', startDate: '', endDate: '', location: '', type: '', price: '', status: 'Applications Open', image: '' });
-  const [newPlan, setNewPlan] = useState({ name: '', price: '', interval: 'monthly', description: '', features: '', isPopular: false });
+  const [newPlan, setNewPlan] = useState({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
+  const [newBlog, setNewBlog] = useState({ title: '', excerpt: '', content: '', author: '', image: '' });
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -75,20 +86,23 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     setLoading(true);
-    const endpoint = activeTab === 'subscribers' ? '/api/admin/subscribers' :
-      activeTab === 'designers' ? '/api/admin/users/designers' :
-        activeTab === 'kyc' ? '/api/admin/kyc' :
-          activeTab === 'eventApps' ? '/api/admin/event-applications' :
-            activeTab === 'plans' ? '/api/admin/plans' : 
-              activeTab === 'payments' ? '/api/payment' : '/api/admin/events';
+    const endpoint = activeTab === 'newsletter' ? '/api/admin/subscribers?type=Newsletter' :
+      activeTab === 'membership' ? '/api/admin/subscribers?type=Member' :
+        activeTab === 'designers' ? '/api/admin/designers' :
+          activeTab === 'kyc' ? '/api/admin/kyc' :
+            activeTab === 'eventApps' ? '/api/admin/event-applications' :
+              activeTab === 'plans' ? '/api/admin/plans' : 
+                activeTab === 'payments' ? '/api/payment' : 
+                  activeTab === 'blogs' ? '/api/admin/blogs' : '/api/admin/events';
 
     try {
       const res = await fetch(endpoint);
       const data = await res.json();
       if (data.success) {
-        if (activeTab === 'subscribers') setSubscribers(data.subscribers || []);
+        if (activeTab === 'newsletter' || activeTab === 'membership') setSubscribers(data.subscribers || []);
         if (activeTab === 'designers') setDesigners(data.designers || []);
         if (activeTab === 'events') setEvents(data.events || []);
+        if (activeTab === 'blogs') setBlogs(data.blogs || []);
         if (activeTab === 'kyc') setKycApps(data.applications || []);
         if (activeTab === 'eventApps') setEventApps(data.applications || []);
         if (activeTab === 'plans') setPlans(data.plans || []);
@@ -119,12 +133,15 @@ export default function AdminDashboard() {
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const endpoint = activeTab === 'designers' ? '/api/admin/designers' : 
-                     activeTab === 'events' ? '/api/admin/events' : '/api/admin/plans';
+                     activeTab === 'events' ? '/api/admin/events' : 
+                     activeTab === 'blogs' ? '/api/admin/blogs' : '/api/admin/plans';
     
     const bodyData = activeTab === 'designers' ? 
       (editMode ? { ...newDesigner, id: editMode } : newDesigner) : 
       activeTab === 'events' ? 
       (editMode ? { ...newEvent, id: editMode } : newEvent) :
+      activeTab === 'blogs' ?
+      (editMode ? { ...newBlog, id: editMode } : newBlog) :
       (editMode ? { ...newPlan, id: editMode, features: typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : newPlan.features } : { ...newPlan, features: typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : newPlan.features });
 
     const method = editMode ? 'PUT' : 'POST';
@@ -143,7 +160,8 @@ export default function AdminDashboard() {
         // Reset all forms
         setNewDesigner({ name: '', specialty: '', tier: 'Premium', location: '', image: '' });
         setNewEvent({ title: '', startDate: '', endDate: '', location: '', type: '', price: '', status: 'Applications Open', image: '' });
-        setNewPlan({ name: '', price: '', interval: 'monthly', description: '', features: '', isPopular: false });
+        setNewPlan({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
+        setNewBlog({ title: '', excerpt: '', content: '', author: '', image: '' });
         fetchData();
       } else {
         toast.error("Failed to save record", { id: t });
@@ -158,6 +176,7 @@ export default function AdminDashboard() {
     const { id, type } = showDeleteConfirm;
     const endpoint = type === 'designers' ? `/api/admin/designers?id=${id}` : 
                      type === 'events' ? `/api/admin/events?id=${id}` :
+                     type === 'blogs' ? `/api/admin/blogs?id=${id}` :
                      `/api/admin/plans?id=${id}`;
 
     const t = toast.loading("De-registering...");
@@ -181,8 +200,10 @@ export default function AdminDashboard() {
       setNewDesigner({ name: item.name, specialty: item.specialty, tier: item.tier, location: item.location, image: item.image });
     } else if (activeTab === 'events') {
       setNewEvent({ title: item.title, startDate: item.startDate, endDate: item.endDate, location: item.location, type: item.type, price: item.price, status: item.status, image: item.image });
+    } else if (activeTab === 'blogs') {
+      setNewBlog({ title: item.title, excerpt: item.excerpt, content: item.content, author: item.author, image: item.image });
     } else {
-      setNewPlan({ name: item.name, price: item.price, interval: item.interval, description: item.description, features: item.features.join(', '), isPopular: item.isPopular });
+      setNewPlan({ name: item.name, price: item.price, currency: item.currency || '£', interval: item.interval, description: item.description, features: item.features.join(', '), isPopular: item.isPopular });
     }
     setShowAddForm(true);
   };
@@ -241,13 +262,15 @@ export default function AdminDashboard() {
           {/* Tabs Menu */}
           <div className="lg:w-64 flex flex-col gap-2">
             {[
-              { id: 'subscribers', label: 'Newsletter', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+              { id: 'newsletter', label: 'Newsletter', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
               { id: 'kyc', label: 'KYC Queue', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
-              { id: 'eventApps', label: 'Event Apps', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-              { id: 'plans', label: 'Membership', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+              { id: 'eventApps', label: 'Event Apps', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
+              { id: 'membership', label: 'Membership', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
               { id: 'designers', label: 'Designers', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
               { id: 'payments', label: 'Payments', icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z' },
               { id: 'events', label: 'Global Events', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z' },
+              { id: 'blogs', label: 'Journal / Blog', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
+              { id: 'plans', label: 'Membership Plans Registry', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -266,14 +289,31 @@ export default function AdminDashboard() {
           {/* Table Content */}
           <div className="flex-1 bg-white/[0.01] border border-white/5 min-h-[600px] overflow-hidden flex flex-col">
             {/* Contextual Action Bar */}
-            {(activeTab === 'events' || activeTab === 'plans') && (
+            {(activeTab === 'events' || activeTab === 'plans' || activeTab === 'designers' || activeTab === 'blogs' || activeTab === 'membership') && (
               <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">{activeTab === 'events' ? 'Global Events Registry' : 'Membership Plans Registry'}</h4>
+                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">
+                  {activeTab === 'events' ? 'Global Events Registry' : 
+                   activeTab === 'plans' ? 'Membership Plans Registry' : 
+                   activeTab === 'designers' ? 'Designer Collective Registry' : 
+                   activeTab === 'membership' ? 'Active Membership Registry' :
+                   'Journal & Blog Registry'}
+                </h4>
                 <button
-                  onClick={() => { setEditMode(null); setShowAddForm(true); }}
+                  onClick={() => { 
+                    if (activeTab === 'membership') {
+                      setActiveTab('plans');
+                    } else {
+                      setEditMode(null); 
+                      setShowAddForm(true); 
+                    }
+                  }}
                   className="bg-primary-gold text-luxury-black px-6 py-3 text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_20px_rgba(232,209,150,0.2)]"
                 >
-                  {activeTab === 'events' ? 'Add New Event' : 'Create New Plan'}
+                  {activeTab === 'events' ? 'Add New Event' : 
+                   activeTab === 'plans' ? 'Create New Plan' : 
+                   activeTab === 'designers' ? 'Add New Designer' : 
+                   activeTab === 'membership' ? 'Manage Membership Plans' :
+                   'Publish New Post'}
                 </button>
               </div>
             )}
@@ -296,42 +336,47 @@ export default function AdminDashboard() {
                     <thead>
                       <tr className="bg-white/[0.03] border-b border-white/10">
                         <th className="py-8 px-10 text-[9px] font-black uppercase tracking-widest text-white/40">
-                          {activeTab === 'subscribers' ? 'Member / Brand' :
-                            activeTab === 'kyc' ? 'Designer / Business' :
-                              activeTab === 'eventApps' ? 'Designer / Event' :
-                                activeTab === 'plans' ? 'Plan Name / Interval' :
-                                  activeTab === 'payments' ? 'Designer / User' :
-                                    activeTab === 'designers' ? 'Designer / Email' : 'Event / Type'}
+                          {activeTab === 'newsletter' ? 'Subscriber' :
+                            activeTab === 'membership' ? 'Member / Brand' :
+                              activeTab === 'kyc' ? 'Designer / Business' :
+                                activeTab === 'eventApps' ? 'Designer / Event' :
+                                  activeTab === 'plans' ? 'Plan Name / Interval' :
+                                    activeTab === 'payments' ? 'Designer / User' :
+                                      activeTab === 'designers' ? 'Designer / Location' : 
+                                        activeTab === 'blogs' ? 'Post Title / Author' : 'Event / Type'}
                         </th>
                         <th className="py-8 px-10 text-[9px] font-black uppercase tracking-widest text-white/40">
-                          {activeTab === 'subscribers' ? 'Contact Email' :
-                            activeTab === 'kyc' ? 'Credentials / Docs' :
-                              activeTab === 'eventApps' ? 'Schedule / Contact' :
-                                activeTab === 'plans' ? 'Pricing / Description' :
-                                  activeTab === 'payments' ? 'Transaction / ID' :
-                                    activeTab === 'designers' ? 'Contact / Verification' : 'Date / Venue'}
+                          {activeTab === 'newsletter' ? 'Contact Email' :
+                            activeTab === 'membership' ? 'Plan / Details' :
+                              activeTab === 'kyc' ? 'Credentials / Docs' :
+                                activeTab === 'eventApps' ? 'Schedule / Contact' :
+                                  activeTab === 'plans' ? 'Pricing / Description' :
+                                    activeTab === 'payments' ? 'Transaction / ID' :
+                                      activeTab === 'designers' ? 'Specialty / Tier' : 
+                                        activeTab === 'blogs' ? 'Date / Excerpt' : 'Date / Venue'}
                         </th>
                         <th className="py-8 px-10 text-[9px] font-black uppercase tracking-widest text-white/40">
                           {activeTab === 'subscribers' ? 'Tier Status' :
                             activeTab === 'events' ? 'Event Status' : 
                              activeTab === 'plans' ? 'Visibility' : 
                                activeTab === 'payments' ? 'Amount / Method' : 
-                                 activeTab === 'designers' ? 'Account Status' : 'Approval Status'}
+                                 activeTab === 'designers' ? 'Account Profile' : 
+                                   activeTab === 'blogs' ? 'Status' : 'Approval Status'}
                         </th>
                         <th className="py-8 px-10 text-right text-[9px] font-black uppercase tracking-widest text-white/40">Management</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {/* Subscribers Render */}
-                      {activeTab === 'subscribers' && subscribers.map((sub) => (
+                      {/* Newsletter & Membership Render */}
+                      {(activeTab === 'newsletter' || activeTab === 'membership') && subscribers.map((sub) => (
                         <tr key={sub._id} className="group hover:bg-white/[0.02] transition-colors">
                           <td className="py-10 px-10">
                             <p className="text-sm font-bold text-white mb-1">{sub.fullName}</p>
-                            <p className="text-[10px] uppercase tracking-widest text-primary-gold/40 font-bold italic">{sub.brandName || "Individual Member"}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-primary-gold/40 font-bold italic">{sub.brandName || (sub.type === 'Newsletter' ? "Public Subscriber" : "Individual Member")}</p>
                           </td>
                           <td className="py-10 px-10"><p className="text-xs text-white/60">{sub.email}</p></td>
                           <td className="py-10 px-10">
-                            <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full ${sub.plan === 'Elite' ? 'bg-secondary-emerald/20 text-secondary-emerald' : 'bg-primary-gold/10 text-primary-gold'}`}>{sub.plan} Plan</span>
+                            <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full ${sub.plan === 'Elite' ? 'bg-secondary-emerald/20 text-secondary-emerald' : 'bg-primary-gold/10 text-primary-gold'}`}>{sub.plan}</span>
                           </td>
                           <td className="py-10 px-10 text-right">
                             <div className="flex justify-end gap-2 transition-opacity">
@@ -427,7 +472,7 @@ export default function AdminDashboard() {
                             <p className="text-[10px] uppercase tracking-widest text-primary-gold/40 font-bold italic">{plan.interval}</p>
                           </td>
                           <td className="py-10 px-10">
-                            <p className="text-xs text-white/60 mb-1">{plan.price}</p>
+                            <p className="text-xs text-white/60 mb-1">{plan.currency || '£'}{plan.price}</p>
                             <p className="text-[9px] font-bold uppercase text-white/20 truncate max-w-[200px]">{plan.description}</p>
                           </td>
                           <td className="py-10 px-10">
@@ -470,21 +515,22 @@ export default function AdminDashboard() {
                         <tr key={des._id} className="group hover:bg-white/[0.02] transition-colors">
                           <td className="py-10 px-10">
                             <p className="text-sm font-bold text-white mb-1">{des.name}</p>
-                            <p className="text-[10px] uppercase tracking-widest text-primary-gold/40 font-bold italic">{des.email}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-primary-gold/40 font-bold italic">{des.location || des.email}</p>
                           </td>
                           <td className="py-10 px-10">
-                            <p className="text-xs text-white/60 mb-1">{des.phone || 'No Phone'}</p>
-                            <p className={`text-[9px] font-bold uppercase tracking-widest ${des.isEmailVerified ? 'text-secondary-emerald' : 'text-red-500'}`}>
-                              {des.isEmailVerified ? 'Email Verified' : 'Email Unverified'}
+                            <p className="text-xs text-white/60 mb-1">{des.specialty || 'General'}</p>
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-secondary-emerald">
+                              {des.tier || 'Premium'} Member
                             </p>
                           </td>
                           <td className="py-10 px-10">
-                            <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${des.membership?.status === 'ACTIVE' ? 'bg-secondary-emerald/20 text-secondary-emerald border-secondary-emerald/20' : 'bg-white/10 text-white/40 border-white/5'}`}>
-                              {des.membership?.status === 'ACTIVE' ? 'Premium Member' : 'Standard Access'}
+                            <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-secondary-emerald/20 bg-secondary-emerald/20 text-secondary-emerald`}>
+                              Active Profile
                             </span>
                           </td>
                           <td className="py-10 px-10 text-right">
                             <div className="flex justify-end gap-2 transition-opacity">
+                              <button onClick={() => openEdit(des)} className="p-3 bg-white/5 border border-white/10 text-white hover:border-primary-gold hover:text-primary-gold transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
                               <button onClick={() => setShowDeleteConfirm({ id: des._id, type: 'designers' })} className="p-3 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                               </button>
@@ -516,12 +562,35 @@ export default function AdminDashboard() {
                         </tr>
                       ))}
 
+                      {/* Blogs Render */}
+                      {activeTab === 'blogs' && blogs.map((blog) => (
+                        <tr key={blog._id} className="group hover:bg-white/[0.02] transition-colors">
+                          <td className="py-10 px-10">
+                            <p className="text-sm font-bold text-white mb-1">{blog.title}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-primary-gold/40 font-bold italic">{blog.author}</p>
+                          </td>
+                          <td className="py-10 px-10">
+                            <p className="text-xs text-white/60 mb-1">{new Date(blog.createdAt).toLocaleDateString()}</p>
+                            <p className="text-[9px] font-bold uppercase text-white/20 truncate max-w-[200px]">{blog.excerpt}</p>
+                          </td>
+                          <td className="py-10 px-10"><span className="text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full bg-secondary-emerald/20 text-secondary-emerald border border-secondary-emerald/20">Published</span></td>
+                          <td className="py-10 px-10 text-right">
+                            <div className="flex justify-end gap-2 transition-opacity">
+                              <button onClick={() => openEdit(blog)} className="p-3 bg-white/5 border border-white/10 text-white hover:border-primary-gold hover:text-primary-gold transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                              <button onClick={() => setShowDeleteConfirm({ id: blog._id, type: 'blogs' })} className="p-3 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+
                       {/* Fallback for Empty */}
-                      {((activeTab === 'subscribers' && subscribers.length === 0) ||
+                      {((activeTab === 'newsletter' && subscribers.length === 0) ||
+                        (activeTab === 'membership' && subscribers.length === 0) ||
                         (activeTab === 'kyc' && kycApps.length === 0) ||
                         (activeTab === 'eventApps' && eventApps.length === 0) ||
                         (activeTab === 'designers' && designers.length === 0) ||
                         (activeTab === 'events' && events.length === 0) ||
+                        (activeTab === 'blogs' && blogs.length === 0) ||
                         (activeTab === 'plans' && plans.length === 0)) && (
                           <tr>
                             <td colSpan={4} className="py-40 text-center">
@@ -573,7 +642,7 @@ export default function AdminDashboard() {
               </button>
 
               <h3 className="text-3xl font-serif font-bold mb-12 italic gold-gradient-text text-center">
-                 {editMode ? 'Modify' : 'Initialize'} {activeTab === 'events' ? 'Event' : activeTab === 'designers' ? 'Designer' : 'Membership Plan'}
+                 {editMode ? 'Modify' : 'Initialize'} {activeTab === 'events' ? 'Event' : activeTab === 'designers' ? 'Designer' : activeTab === 'blogs' ? 'Journal Post' : 'Membership Plan'}
               </h3>
 
               <form onSubmit={handleAddSubmit} className="space-y-8">
@@ -635,10 +704,53 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+                ) : activeTab === 'blogs' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <input type="text" placeholder="Post Title" required className="admin-input col-span-2" value={newBlog.title} onChange={(e) => setNewBlog({ ...newBlog, title: e.target.value })} />
+                    <input type="text" placeholder="Author Name" required className="admin-input" value={newBlog.author} onChange={(e) => setNewBlog({ ...newBlog, author: e.target.value })} />
+                    <input type="text" placeholder="Short Excerpt" required className="admin-input" value={newBlog.excerpt} onChange={(e) => setNewBlog({ ...newBlog, excerpt: e.target.value })} />
+                    
+                    <div className="col-span-2 space-y-2">
+                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Post Content (HTML allowed)</label>
+                      <textarea 
+                       placeholder="Write your article here..." 
+                       required
+                       className="w-full bg-transparent border border-white/10 p-4 text-white focus:outline-none focus:border-primary-gold transition-all text-sm min-h-[200px]"
+                       value={newBlog.content}
+                       onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="col-span-2 space-y-4">
+                      <label className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Featured Cover Image</label>
+                      <div className="flex items-center gap-6">
+                        <div className="w-32 h-20 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex items-center justify-center">
+                          {newBlog.image ? <img src={newBlog.image} className="w-full h-full object-cover" /> : <svg className="w-8 h-8 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+                        </div>
+                        <input type="file" accept="image/*" onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => setNewBlog({ ...newBlog, image: reader.result as string });
+                            reader.readAsDataURL(file);
+                          }
+                        }} className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer" />
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <input type="text" placeholder="Plan Name (e.g. Elite Collective)" required className="admin-input col-span-2" value={newPlan.name} onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })} />
-                    <input type="text" placeholder="Price (e.g. £199)" required className="admin-input" value={newPlan.price} onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })} />
+                    
+                    <div className="flex gap-2">
+                       <select className="admin-input bg-luxury-black w-24" value={newPlan.currency} onChange={(e) => setNewPlan({ ...newPlan, currency: e.target.value })}>
+                         <option value="£">£ (GBP)</option>
+                         <option value="$">$ (USD)</option>
+                         <option value="€">€ (EUR)</option>
+                         <option value="PKR">PKR</option>
+                       </select>
+                       <input type="text" placeholder="Price (e.g. 199)" required className="admin-input flex-1" value={newPlan.price} onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })} />
+                    </div>
                     
                     <select className="admin-input bg-luxury-black" value={newPlan.interval} onChange={(e) => setNewPlan({ ...newPlan, interval: e.target.value as any })}>
                       <option value="monthly">Monthly Billing</option>

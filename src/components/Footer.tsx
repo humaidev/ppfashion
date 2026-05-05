@@ -13,14 +13,14 @@ export default function Footer() {
           {/* Brand Info */}
           <div className="lg:col-span-5">
             <Link href="/" className="inline-block mb-8 hover:opacity-80 transition-all origin-left">
-              <Image
-                src="/logo.png"
-                alt="PPFashion Logo"
-                width={200}
-                height={60}
-                className="object-contain"
-                unoptimized
-              />
+                <Image
+                  src="/logo.png"
+                  alt="PPFashion Logo"
+                  width={200}
+                  height={60}
+                  className="object-contain"
+                  unoptimized
+                />
             </Link>
             <p className="text-white/40 max-w-sm mb-10 leading-relaxed text-sm font-medium italic">
               Empowering the elite Pakistani fashion collective through exclusive networking and high-profile global showcases.

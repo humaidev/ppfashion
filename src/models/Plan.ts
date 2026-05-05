@@ -6,6 +6,7 @@ export interface IPlan {
   price: string;
   interval: 'monthly' | 'yearly';
   description: string;
+  currency: string;
   features: string[];
   isPopular?: boolean;
   createdAt: Date;
@@ -15,6 +16,7 @@ export interface IPlan {
 const PlanSchema = new Schema<IPlan>({
   name: { type: String, required: true },
   price: { type: String, required: true },
+  currency: { type: String, default: '£' },
   interval: { type: String, enum: ['monthly', 'yearly'], default: 'monthly' },
   description: { type: String, required: true },
   features: [{ type: String }],

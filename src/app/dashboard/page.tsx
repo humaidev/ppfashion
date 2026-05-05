@@ -13,23 +13,26 @@ export default function DesignerDashboard() {
   const [newCard, setNewCard] = useState({ number: '', expiry: '', cvc: '' });
   const router = useRouter();
 
-  const fetchProfile = async () => {
-    try {
-      const res = await fetch("/api/auth/profile");
-      const data = await res.json();
-      if (data.success) {
-        setUser(data.user);
-      } else {
-        router.push("/login");
-      }
-    } catch (err) {
-      router.push("/login");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/auth/profile");
+        const data = await res.json();
+        if (data.success) {
+          if (data.user.role === 'ADMIN') {
+            router.push("/admin");
+            return;
+          }
+          setUser(data.user);
+        } else {
+          router.push("/login");
+        }
+      } catch (err) {
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchProfile();
   }, [router]);
 

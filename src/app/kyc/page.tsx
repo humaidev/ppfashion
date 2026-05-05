@@ -228,7 +228,7 @@ export default function KYCPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Experience (Years)</label>
-                    <input type="text" name="experience" required value={formData.experience} onChange={handleInputChange} className="kyc-input" placeholder="5 Years" />
+                    <input type="number" name="experience" required value={formData.experience} onChange={handleInputChange} className="kyc-input" placeholder="5" min="0" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-white/30">Portfolio / Social Links (Comma separated)</label>

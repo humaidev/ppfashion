@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User, { UserRole } from '@/models/User';
 import bcrypt from 'bcryptjs';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -31,8 +32,8 @@ export async function POST(req: Request) {
       isEmailVerified: false
     });
 
-    // MOCK EMAIL SENDING
-    console.log(`[EMAIL VERIFICATION] To: ${email}, Code: ${verificationCode}`);
+    // DISPATCH REAL EMAIL
+    await sendVerificationEmail(email, verificationCode);
 
     return NextResponse.json({ 
       success: true, 

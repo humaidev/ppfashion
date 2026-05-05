@@ -33,7 +33,7 @@ export interface IUser extends Document {
     passport?: string;
     businessName: string;
     category: string;
-    experience: string;
+    experience: number;
     portfolioLinks: string[];
     city: string;
     address: string;
@@ -48,7 +48,7 @@ export interface IUser extends Document {
 
   // Membership Info
   membership: {
-    plan: MembershipPlan;
+    plan: string;
     status: 'ACTIVE' | 'EXPIRED' | 'INACTIVE';
     startDate?: Date;
     expiryDate?: Date;
@@ -80,7 +80,7 @@ const UserSchema: Schema = new Schema(
       passport: String,
       businessName: String,
       category: String,
-      experience: String,
+      experience: Number,
       portfolioLinks: [String],
       city: String,
       address: String,
@@ -94,7 +94,7 @@ const UserSchema: Schema = new Schema(
     },
 
     membership: {
-      plan: { type: String, enum: Object.values(MembershipPlan), default: MembershipPlan.NONE },
+      plan: { type: String, default: 'NONE' },
       status: { type: String, enum: ['ACTIVE', 'EXPIRED', 'INACTIVE'], default: 'INACTIVE' },
       startDate: Date,
       expiryDate: Date,

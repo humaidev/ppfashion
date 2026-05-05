@@ -127,7 +127,10 @@ export default function Navbar() {
                       {/* <div className="px-6 py-4 border-b border-white/5 mb-2">
                         <p className="text-[10px] font-black uppercase tracking-widest text-primary-gold">Member Menu</p>
                       </div> */}
-                      <Link href="/dashboard" className="flex items-center px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/5 transition-all">
+                      <Link 
+                        href={userRole === 'ADMIN' ? "/admin" : "/dashboard"} 
+                        className="flex items-center px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/5 transition-all"
+                      >
                         Dashboard
                       </Link>
                       <Link href="/profile" className="flex items-center px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white/70 hover:text-white hover:bg-white/5 transition-all">

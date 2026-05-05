@@ -72,12 +72,12 @@ export default function ProfilePage() {
               <h3 className="text-xl font-serif font-bold text-white mb-2">{user?.name}</h3>
               <p className="text-[10px] uppercase tracking-widest text-primary-gold font-black mb-6">{user?.role}</p>
               
-              <div className={`inline-block px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${user?.membership?.status === 'ACTIVE' ? 'bg-secondary-emerald/20 text-secondary-emerald' : 'bg-white/10 text-white/40'}`}>
-                {user?.membership?.status === 'ACTIVE' ? 'Premium Member' : 'Standard Access'}
+              <div className={`inline-block px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${user?.role === 'ADMIN' ? 'bg-primary-gold/20 text-primary-gold border border-primary-gold/20' : user?.membership?.status === 'ACTIVE' ? 'bg-secondary-emerald/20 text-secondary-emerald' : 'bg-white/10 text-white/40'}`}>
+                {user?.role === 'ADMIN' ? 'Full System Access' : user?.membership?.status === 'ACTIVE' ? 'Premium Member' : 'Standard Access'}
               </div>
             </div>
 
-            <Link href="/dashboard" className="block w-full text-center border border-white/10 py-5 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-luxury-black transition-all">
+            <Link href={user?.role === 'ADMIN' ? "/admin" : "/dashboard"} className="block w-full text-center border border-white/10 py-5 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-luxury-black transition-all">
               Go to Dashboard
             </Link>
           </div>

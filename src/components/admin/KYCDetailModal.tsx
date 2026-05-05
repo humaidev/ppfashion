@@ -46,7 +46,7 @@ export default function KYCDetailModal({ selectedKYC, setSelectedKYC, updateKYC,
                </div>
                <div>
                  <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Industry Experience</p>
-                 <p className="text-sm font-bold text-white">{selectedKYC.kycData?.experience}</p>
+                 <p className="text-sm font-bold text-white">{selectedKYC.kycData?.experience} Years</p>
                </div>
             </div>
             <div className="space-y-8 text-left">

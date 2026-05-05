@@ -75,7 +75,7 @@ export default function MembershipPage() {
           </p>
         </div>
 
-        {user && user.kycStatus !== 'APPROVED' && (
+        {user && user.role !== 'ADMIN' && user.kycStatus !== 'APPROVED' && (
           <div className="mb-24 p-10 bg-red-500/5 border border-red-500/10 flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] font-black text-red-500 mb-2">Verification Required</p>
@@ -100,7 +100,7 @@ export default function MembershipPage() {
               <div className="mb-12">
                 <h3 className="text-4xl font-serif font-bold mb-6 italic text-white group-hover:gold-gradient-text transition-all">{plan.name}</h3>
                 <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-6xl font-bold tracking-tighter text-white">{plan.price}</span>
+                  <span className="text-6xl font-bold tracking-tighter text-white">{plan.currency || '£'}{plan.price}</span>
                   <span className="text-[10px] uppercase tracking-[0.3em] text-white/30 font-bold">/ {plan.interval === 'monthly' ? 'Month' : 'Year'}</span>
                 </div>
                 <p className="text-xs text-white/40 leading-relaxed font-medium min-h-[48px]">{plan.description}</p>
@@ -125,7 +125,7 @@ export default function MembershipPage() {
                   onClick={() => handlePurchase(plan)}
                   className={`w-full text-center font-black py-6 rounded-sm transition-all uppercase tracking-[0.3em] text-[10px] shadow-2xl brand-gradient brand-gradient-hover text-white hover:scale-[1.02] active:scale-[0.98] ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {processing ? "Initializing..." : user?.kycStatus === 'APPROVED' ? `Activate ${plan.name}` : "Become Member"}
+                  {processing ? "Initializing..." : (user?.kycStatus === 'APPROVED' || user?.role === 'ADMIN') ? `Activate ${plan.name}` : "Become Member"}
                 </button>
                 {plan.interval === 'monthly' && (
                   <p className="text-center text-[9px] uppercase tracking-widest text-white/20 font-bold">

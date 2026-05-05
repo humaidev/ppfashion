@@ -73,7 +73,29 @@ function VerifyEmailContent() {
               {loading ? "Verifying..." : "Verify Identity"}
             </button>
 
-            <button type="button" className="text-[9px] font-bold text-white/20 uppercase tracking-widest hover:text-white transition-colors">
+            <button 
+              type="button" 
+              disabled={loading || success}
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  const res = await fetch("/api/auth/resend-code", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    alert("A new code has been dispatched. Please check your system logs.");
+                  }
+                } catch (err) {
+                  setError("Resend failed.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="text-[9px] font-bold text-white/20 uppercase tracking-widest hover:text-white transition-colors"
+            >
               Resend Code
             </button>
           </form>

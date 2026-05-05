@@ -35,8 +35,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${playfair.variable} ${outfit.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-warm-ivory text-luxury-black dark:bg-luxury-black dark:text-warm-ivory">
+      <body 
+        className="min-h-full flex flex-col bg-warm-ivory text-luxury-black dark:bg-luxury-black dark:text-warm-ivory"
+        suppressHydrationWarning
+      >
         <Navbar />
         <main className="flex-1 pt-24">
           {children}
