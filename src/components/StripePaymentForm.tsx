@@ -98,22 +98,29 @@ export default function StripePaymentForm({
         <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-6">Secure Payment Registry</p>
         
         <div className="p-4 bg-white/[0.03] border border-white/10 rounded-sm">
-          <CardElement 
-            options={{
-              style: {
-                base: {
-                  fontSize: '14px',
-                  color: '#ffffff',
-                  '::placeholder': {
-                    color: 'rgba(255,255,255,0.2)',
+          {stripe ? (
+            <CardElement 
+              options={{
+                style: {
+                  base: {
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    '::placeholder': {
+                      color: 'rgba(255,255,255,0.2)',
+                    },
+                  },
+                  invalid: {
+                    color: '#ef4444',
                   },
                 },
-                invalid: {
-                  color: '#ef4444',
-                },
-              },
-            }}
-          />
+              }}
+            />
+          ) : (
+            <div className="py-2 text-[10px] text-red-400 uppercase tracking-widest font-bold">
+              ⚠️ Stripe Gateway Connection Failed. <br/>
+              <span className="text-[8px] opacity-60">Please ensure NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is set in your Vercel Environment Variables.</span>
+            </div>
+          )}
         </div>
         <p className="text-[9px] text-white/20 uppercase tracking-widest mt-4">
           Encrypted by Stripe. Your card data never touches our servers.

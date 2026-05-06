@@ -7,7 +7,9 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripePaymentForm from "@/components/StripePaymentForm";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) 
+  : (console.warn("Stripe Publishable Key is missing! Check your Vercel Environment Variables."), null);
 
 export default function KYCPage() {
   const [step, setStep] = useState(1);
