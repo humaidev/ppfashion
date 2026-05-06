@@ -38,6 +38,27 @@ export default function KYCPage() {
 
   const [agreed, setAgreed] = useState(false);
 
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedData = localStorage.getItem("kyc_form_draft");
+    const savedStep = localStorage.getItem("kyc_form_step");
+    if (savedData) {
+      try {
+        setFormData(prev => ({ ...prev, ...JSON.parse(savedData) }));
+      } catch (e) { console.error("Failed to parse saved KYC data"); }
+    }
+    if (savedStep) {
+      setStep(parseInt(savedStep));
+    }
+  }, []);
+
+  // Save to localStorage on change
+  useEffect(() => {
+    localStorage.setItem("kyc_form_draft", JSON.stringify(formData));
+    localStorage.setItem("kyc_form_step", step.toString());
+  }, [formData, step]);
+
+
   useEffect(() => {
     // Check if user is logged in
     const checkUser = async () => {
@@ -99,6 +120,8 @@ export default function KYCPage() {
 
       const data = await res.json();
       if (data.success) {
+        localStorage.removeItem("kyc_form_draft");
+        localStorage.removeItem("kyc_form_step");
         setStep(6); // Success screen
       } else {
         setError(data.message || "KYC submission failed");
@@ -247,41 +270,62 @@ export default function KYCPage() {
                 <h3 className="text-xl font-serif font-bold mb-10 italic text-white/90">Step 4: Document Uploads</h3>
                 <div className="space-y-10">
                   {[
-                    { label: "CNIC / Identity Front", name: "cnicFront" },
-                    { label: "CNIC / Identity Back", name: "cnicBack" },
-                    { label: "Selfie with Identity", name: "selfieWithCnic" },
-                    { label: "Trade License (Optional)", name: "license" },
+                    { label: "Identity Front (CNIC/Passport)", name: "cnicFront", desc: "Ensure all text is clearly legible" },
+                    { label: "Identity Back", name: "cnicBack", desc: "Clear view of the address side" },
+                    { label: "Selfie with Identity", name: "selfieWithCnic", desc: "Hold your ID next to your face" },
+                    { label: "Trade License (Optional)", name: "license", desc: "Official business registration" },
                   ].map((doc) => (
-                    <div key={doc.name} className="space-y-4">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-white/30">{doc.label}</label>
-                      <div className="flex items-center gap-6">
-                        <div className="w-24 h-16 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex items-center justify-center">
+                    <div key={doc.name} className="group">
+                      <div className="flex flex-col md:flex-row gap-8 items-start md:items-center p-8 bg-white/[0.03] border border-white/10 rounded-sm hover:border-primary-gold/30 transition-all">
+                        <div className="relative w-full md:w-48 aspect-video bg-black/40 border border-white/5 rounded-sm overflow-hidden group-hover:shadow-2xl transition-all">
                           {(formData.documents as any)[doc.name] ? (
-                            <img src={(formData.documents as any)[doc.name]} className="w-full h-full object-cover" />
+                            <>
+                              <img src={(formData.documents as any)[doc.name]} className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-luxury-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <span className="text-[8px] text-white font-bold uppercase tracking-widest">Click to Change</span>
+                              </div>
+                            </>
                           ) : (
-                            <svg className="w-6 h-6 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                              <svg className="w-6 h-6 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                              <span className="text-[8px] text-white/20 font-bold uppercase tracking-widest">No File</span>
+                            </div>
                           )}
                         </div>
-                        <div className="flex-1">
-                          <input 
-                            type="file" 
-                            accept="image/*"
-                            required={doc.name !== "license"}
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setFormData({
-                                    ...formData,
-                                    documents: { ...formData.documents, [doc.name]: reader.result as string }
-                                  });
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                            className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer"
-                          />
+                        
+                        <div className="flex-1 space-y-3">
+                           <div className="flex items-center gap-3">
+                             <h4 className="text-xs font-serif font-bold text-white tracking-wide">{doc.label}</h4>
+                             {(formData.documents as any)[doc.name] && (
+                               <span className="w-1.5 h-1.5 bg-secondary-emerald rounded-full shadow-[0_0_8px_#00FF9D]"></span>
+                             )}
+                           </div>
+                           <p className="text-[9px] text-white/30 uppercase tracking-widest leading-relaxed">{doc.desc}</p>
+                           
+                           <div className="relative pt-2">
+                             <input 
+                               type="file" 
+                               accept="image/*"
+                               required={doc.name !== "license"}
+                               onChange={(e) => {
+                                 const file = e.target.files?.[0];
+                                 if (file) {
+                                   const reader = new FileReader();
+                                   reader.onloadend = () => {
+                                     setFormData({
+                                       ...formData,
+                                       documents: { ...formData.documents, [doc.name]: reader.result as string }
+                                     });
+                                   };
+                                   reader.readAsDataURL(file);
+                                 }
+                               }}
+                               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                             />
+                             <div className="inline-block px-6 py-2 bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/60 group-hover:bg-primary-gold group-hover:text-luxury-black transition-all">
+                               {(formData.documents as any)[doc.name] ? "Replace Document" : "Upload File"}
+                             </div>
+                           </div>
                         </div>
                       </div>
                     </div>
