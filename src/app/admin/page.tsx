@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from 'react-hot-toast';
+import KYCDetailModal from "@/components/admin/KYCDetailModal";
+import EventAppDetailModal from "@/components/admin/EventAppDetailModal";
+
 
 interface ISubscriber {
   _id: string;
@@ -60,6 +63,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedKYC, setSelectedKYC] = useState<any>(null);
+  const [selectedEventApp, setSelectedEventApp] = useState<any>(null);
+
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ id: string, type: string } | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState<{ id: string, type: 'kyc' | 'eventApp' } | null>(null);
@@ -452,10 +457,24 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-10 px-10 text-right">
                             <div className="flex justify-end gap-2 transition-opacity">
+                              <button onClick={() => setSelectedEventApp(app)} className="p-3 bg-white/5 border border-white/10 text-white hover:border-primary-gold hover:text-primary-gold transition-all" title="Review Application">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                              </button>
                               {app.status === 'PENDING' ? (
                                 <>
-                                  <button onClick={() => updateEventApp(app._id, 'APPROVED')} className="text-[9px] font-black uppercase bg-white/5 border border-white/10 px-4 py-2 hover:bg-primary-gold hover:text-luxury-black transition-all">Approve</button>
-                                  <button onClick={() => updateEventApp(app._id, 'REJECTED')} className="text-[9px] font-black uppercase text-red-500 px-4 py-2 hover:bg-red-500 hover:text-white transition-all">Decline</button>
+                                  <button onClick={() => updateEventApp(app._id, 'APPROVED')} className="p-3 bg-secondary-emerald/20 text-secondary-emerald hover:bg-secondary-emerald hover:text-white transition-all" title="Quick Approve">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </button>
+                                  <button onClick={() => updateEventApp(app._id, 'REJECTED')} className="p-3 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all" title="Quick Decline">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
                                 </>
                               ) : (
                                 <span className="text-[9px] font-black uppercase text-white/20 tracking-widest px-4 py-2 italic">Processed</span>
@@ -786,101 +805,18 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
-      {/* KYC Detail Modal */}
-      <AnimatePresence>
-        {selectedKYC && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] bg-luxury-black/98 backdrop-blur-3xl flex items-center justify-center p-6"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              className="bg-white/[0.03] border border-white/10 p-12 max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar relative"
-            >
-              <button onClick={() => setSelectedKYC(null)} className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors">
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+      <KYCDetailModal 
+        selectedKYC={selectedKYC} 
+        setSelectedKYC={setSelectedKYC} 
+        updateKYC={updateKYC} 
+        setFullScreenImage={setFullScreenImage} 
+      />
 
-              <div className="mb-12">
-                <p className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[9px] mb-4 text-center">Comprehensive Verification Dossier</p>
-                <h3 className="text-4xl font-serif font-bold text-white text-center uppercase tracking-tighter italic">{selectedKYC.name}</h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
-                <div className="space-y-8">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Business / Brand Entity</p>
-                    <p className="text-lg font-serif italic text-white">{selectedKYC.kycData?.businessName}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Artistic Category</p>
-                    <p className="text-sm font-bold text-primary-gold uppercase tracking-widest">{selectedKYC.kycData?.category}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Industry Experience</p>
-                    <p className="text-sm font-bold text-white">{selectedKYC.kycData?.experience}</p>
-                  </div>
-                </div>
-                <div className="space-y-8">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Strategic Location</p>
-                    <p className="text-sm font-bold text-white uppercase tracking-widest">{selectedKYC.kycData?.city}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Registered Address</p>
-                    <p className="text-xs text-white/60 leading-relaxed font-medium uppercase tracking-widest">{selectedKYC.kycData?.address}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-16">
-                <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-8 border-b border-white/5 pb-4">Verification Documents</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[
-                    { label: 'Identity Front', src: selectedKYC.kycData?.documents?.cnicFront },
-                    { label: 'Identity Back', src: selectedKYC.kycData?.documents?.cnicBack },
-                    { label: 'Security Selfie', src: selectedKYC.kycData?.documents?.selfieWithCnic },
-                  ].map((doc) => (
-                    <div key={doc.label} className="group relative">
-                      <p className="text-[9px] uppercase tracking-widest text-white/40 mb-3 font-black">{doc.label}</p>
-                      <div className="aspect-[3/2] bg-white/5 border border-white/10 rounded-sm overflow-hidden hover:border-primary-gold transition-colors">
-                        {doc.src ? (
-                          <img src={doc.src} alt={doc.label} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center italic text-[9px] opacity-20">No Image Uploaded</div>
-                        )}
-                      </div>
-                      <div onClick={() => doc.src && setFullScreenImage(doc.src)} className="absolute inset-0 bg-luxury-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
-                        <span className="text-[9px] font-black uppercase tracking-widest border border-white/20 px-4 py-2 hover:bg-white hover:text-luxury-black transition-all">Expand View</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {selectedKYC.kycStatus === 'PENDING' && (
-                <div className="flex gap-4 pt-10 border-t border-white/5">
-                  <button
-                    onClick={() => { updateKYC(selectedKYC._id, 'APPROVED'); setSelectedKYC(null); }}
-                    className="flex-1 bg-secondary-emerald text-white py-6 text-[10px] font-black uppercase tracking-[0.3em] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(0,130,91,0.3)]"
-                  >
-                    Approve Application
-                  </button>
-                  <button
-                    onClick={() => { updateKYC(selectedKYC._id, 'REJECTED'); setSelectedKYC(null); }}
-                    className="flex-1 border border-red-500/30 text-red-500 py-6 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-red-500 hover:text-white transition-all"
-                  >
-                    Reject with Feedback
-                  </button>
-                </div>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <EventAppDetailModal 
+        selectedApp={selectedEventApp} 
+        setSelectedApp={setSelectedEventApp} 
+        updateApp={updateEventApp} 
+      />
 
       {/* Full Screen Image Overlay */}
       <AnimatePresence>
