@@ -3,6 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import StripePaymentForm from "@/components/StripePaymentForm";
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function KYCPage() {
   const [step, setStep] = useState(1);
@@ -28,7 +33,7 @@ export default function KYCPage() {
   });
   const [plans, setPlans] = useState<any[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
-  const [cardDetails, setCardDetails] = useState({ name: '', number: '', expiry: '', cvc: '' });
+
   const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
@@ -75,39 +80,12 @@ export default function KYCPage() {
     fetchPlans();
   }, [router]);
 
-  const handlePaymentAndSubmit = async () => {
-    if (!selectedPlan) {
-      setError("Please select a membership plan to proceed.");
-      return;
-    }
-    if (!cardDetails.number || !cardDetails.cvc) {
-      setError("Invalid payment details. Please check your card information.");
-      return;
-    }
-
+  const handlePaymentSuccess = async (paymentIntent: any) => {
     setLoading(true);
     setError("");
 
     try {
-      // 1. Process Payment
-      const payRes = await fetch("/api/payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: selectedPlan._id,
-          planName: selectedPlan.name,
-          amount: selectedPlan.price,
-          cardDetails
-        })
-      });
-      const payData = await payRes.json();
-      if (!payData.success) {
-        setError("Payment authorization failed. Please try a different card.");
-        setLoading(false);
-        return;
-      }
-
-      // 2. Submit KYC
+      // Finalize KYC Submission
       const res = await fetch("/api/kyc/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -370,33 +348,21 @@ export default function KYCPage() {
                   </div>
                 </div>
 
-                <div className="space-y-8 bg-black/40 p-8 rounded-sm border border-white/5">
-                   <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Secure Card Detail</p>
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-2 col-span-2">
-                        <label className="text-[9px] uppercase tracking-widest text-white/20">Cardholder Name</label>
-                        <input type="text" className="kyc-input" placeholder="DESIGNER NAME" value={cardDetails.name} onChange={(e) => setCardDetails({...cardDetails, name: e.target.value})} />
-                      </div>
-                      <div className="space-y-2 col-span-2">
-                        <label className="text-[9px] uppercase tracking-widest text-white/20">Card Number</label>
-                        <input type="text" className="kyc-input" placeholder="4242 4242 4242 4242" value={cardDetails.number} onChange={(e) => setCardDetails({...cardDetails, number: e.target.value})} />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-widest text-white/20">Expiry (MM/YY)</label>
-                        <input type="text" className="kyc-input" placeholder="12/26" value={cardDetails.expiry} onChange={(e) => setCardDetails({...cardDetails, expiry: e.target.value})} />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[9px] uppercase tracking-widest text-white/20">CVC</label>
-                        <input type="text" className="kyc-input" placeholder="***" value={cardDetails.cvc} onChange={(e) => setCardDetails({...cardDetails, cvc: e.target.value})} />
-                      </div>
-                   </div>
-                </div>
+                {selectedPlan && (
+                  <Elements stripe={stripePromise}>
+                    <StripePaymentForm 
+                      plan={selectedPlan}
+                      formData={formData}
+                      loading={loading}
+                      setLoading={setLoading}
+                      onSuccess={handlePaymentSuccess}
+                      onError={setError}
+                    />
+                  </Elements>
+                )}
 
-                <div className="mt-12 flex justify-between">
-                   <button onClick={prevStep} className="kyc-btn-secondary">← Back</button>
-                   <button onClick={handlePaymentAndSubmit} disabled={loading} className="kyc-btn-primary">
-                     {loading ? "Processing Securely..." : `Pay ${selectedPlan?.price || ''} & Submit`}
-                   </button>
+                <div className="mt-8 flex justify-start">
+                   <button onClick={prevStep} className="kyc-btn-secondary">← Back to Selection</button>
                 </div>
               </motion.div>
             )}

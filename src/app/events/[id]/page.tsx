@@ -1,64 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-const events = [
-  {
-    id: 1,
-    title: "Glasgow Fashion Gala 2026",
-    date: "June 15, 2026",
-    location: "Glasgow Royal Concert Hall",
-    type: "Fashion Show",
-    image: "/vvip-event.jpg",
-    status: "Applications Open",
-    price: "From £45",
-    description: "The flagship event of the summer season. Experience a night of unparalleled luxury as we showcase 12 elite designers in the heart of Glasgow. This year's theme focuses on 'Heritage Refined', blending ancient embroidery techniques with futuristic silhouettes.",
-    itinerary: [
-        { time: "18:30", label: "Red Carpet Arrival & Drinks" },
-        { time: "19:30", label: "Opening Ceremony" },
-        { time: "20:00", label: "Main Runway Show" },
-        { time: "21:30", label: "After-Party & Networking" },
-    ],
-  },
-  {
-    id: 2,
-    title: "Pakistani Design Awards",
-    date: "August 22, 2026",
-    location: "London Hilton Park Lane",
-    type: "Awards Ceremony",
-    image: "/runway-red.jpg",
-    status: "Early Bird Tickets",
-    price: "From £95",
-    description: "Celebrating the pioneers and rising stars of the Pakistani fashion industry. Join us for a black-tie evening at the Hilton Park Lane, London, as we honor excellence in design, sustainability, and innovation.",
-    itinerary: [
-        { time: "19:00", label: "VIP Reception" },
-        { time: "20:00", label: "Gala Dinner" },
-        { time: "21:30", label: "Awards Presentation" },
-        { time: "23:00", label: "Late Night Lounge" },
-    ],
-  },
-  {
-    id: 3,
-    title: "Digital Trends Masterclass",
-    date: "September 10, 2026",
-    location: "Virtual / Private Hub",
-    type: "Workshop",
-    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop",
-    status: "Members Only",
-    price: "Free for Premium",
-    description: "An exclusive digital-first masterclass for our members. Learn how to leverage AI and emerging digital platforms to scale your fashion brand globally without losing your cultural core.",
-    itinerary: [
-        { time: "14:00", label: "Session 1: AI in Design" },
-        { time: "15:30", label: "Breakout Rooms" },
-        { time: "16:00", label: "Session 2: Global Logistics" },
-        { time: "17:30", label: "Q&A with Industry Leaders" },
-    ],
-  },
-];
+import dbConnect from "@/lib/dbConnect";
+import Event from "@/models/Event";
 
 export default async function EventDetailPage({ params }: { params: { id: string } }) {
-  const eventId = parseInt(params.id);
-  const event = events.find((e) => e.id === eventId);
+  await dbConnect();
+  
+  let event;
+  try {
+    event = await Event.findById(params.id);
+  } catch (err) {
+    // Invalid ID
+  }
 
   if (!event) {
     notFound();
@@ -86,7 +40,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
                         {event.type}
                     </span>
                     <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-4">{event.title}</h1>
-                    <p className="text-primary-gold font-bold uppercase tracking-[0.3em] text-sm">{event.date} • {event.location}</p>
+                    <p className="text-primary-gold font-bold uppercase tracking-[0.3em] text-sm">{event.startDate} • {event.location}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md p-8 border border-white/20">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-white/60 block mb-2 text-right">Investment</span>
@@ -99,18 +53,22 @@ export default async function EventDetailPage({ params }: { params: { id: string
             <div className="lg:col-span-2">
                 <h2 className="text-3xl font-serif font-bold mb-10 border-b border-primary-gold/10 pb-6 italic text-primary-gold">About the Event</h2>
                 <p className="text-xl leading-relaxed text-luxury-black/70 dark:text-warm-ivory/70 mb-16">
-                    {event.description}
+                    {event.description || "Join us for an extraordinary showcase of Pakistani fashion excellence. This event brings together the most visionary designers and prestigious guests for a night of culture and high style."}
                 </p>
 
-                <h3 className="text-2xl font-serif font-bold mb-10">Event Itinerary</h3>
-                <div className="space-y-6">
-                    {event.itinerary.map((item, i) => (
-                        <div key={i} className="flex gap-12 items-center p-6 border border-primary-gold/5 hover:border-primary-gold/30 transition-all bg-white/5">
-                            <span className="text-primary-gold font-bold tracking-widest text-lg">{item.time}</span>
-                            <span className="text-luxury-black/80 dark:text-warm-ivory/80 font-bold uppercase tracking-widest text-xs">{item.label}</span>
+                {event.itinerary && event.itinerary.length > 0 && (
+                    <>
+                        <h3 className="text-2xl font-serif font-bold mb-10">Event Itinerary</h3>
+                        <div className="space-y-6">
+                            {event.itinerary.map((item: string, i: number) => (
+                                <div key={i} className="flex gap-12 items-center p-6 border border-primary-gold/5 hover:border-primary-gold/30 transition-all bg-white/5">
+                                    <span className="text-primary-gold font-bold tracking-widest text-xs uppercase">Agenda Item {i+1}</span>
+                                    <span className="text-luxury-black/80 dark:text-warm-ivory/80 font-bold uppercase tracking-widest text-xs">{item}</span>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </>
+                )}
             </div>
 
             <div>
@@ -122,13 +80,13 @@ export default async function EventDetailPage({ params }: { params: { id: string
                             <span className="text-primary-gold">{event.status}</span>
                         </div>
                         <div className="flex justify-between items-center text-white/60 text-xs font-bold uppercase tracking-widest">
-                            <span>Capacity</span>
-                            <span className="text-white">Limited</span>
+                            <span>Location</span>
+                            <span className="text-white truncate max-w-[150px]">{event.location}</span>
                         </div>
                     </div>
                     
                     <button className="w-full bg-primary-gold hover:bg-vibrant-gold text-luxury-black font-bold py-5 uppercase tracking-widest text-xs transition-all mb-4">
-                        {event.status.includes('Tickets') ? 'Book Now' : 'Apply to Attend'}
+                        {event.status?.includes('Tickets') ? 'Book Now' : 'Apply to Attend'}
                     </button>
                     <p className="text-[9px] text-white/40 text-center uppercase tracking-widest">Members get priority access and discounts</p>
                 </div>

@@ -15,39 +15,26 @@ export async function POST(req: Request) {
     const decoded = verifyToken(token) as any;
     if (!decoded) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
-    const { planId, planName, amount, cardDetails } = await req.json();
+    const { planId, planName, amount } = await req.json();
 
-    // MOCK PAYMENT PROCESSING
-    // In a real app, you'd use Stripe/PayPal here
-    const transactionId = 'TXN_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    // REAL STRIPE PROCESSING
+    const { stripe } = await import('@/lib/stripe');
     
-    const newTransaction = await Transaction.create({
-      userId: decoded.id,
-      planId,
-      amount,
-      paymentMethod: 'Credit Card',
-      cardLast4: cardDetails.number?.slice(-4) || 'XXXX',
-      transactionId,
-      status: TransactionStatus.COMPLETED
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(parseFloat(amount) * 100), // Stripe expects cents
+      currency: 'gbp', 
+      description: `Membership: ${planName}`,
+      metadata: { userId: decoded.id, planId, planName }
     });
 
-    // Update user membership status and save card metadata
-    const cardBrand = cardDetails.number?.startsWith('4') ? 'Visa' : 'Mastercard';
-    
-    await User.findByIdAndUpdate(decoded.id, {
-      "membership.plan": planName || "Premium", // Save the plan name
-      "membership.status": 'ACTIVE',
-      "membership.startDate": new Date(),
-      "membership.cardLast4": cardDetails.number?.slice(-4) || 'XXXX',
-      "membership.paymentMethod": cardBrand,
-      membershipTier: 'PAID', 
-      paymentStatus: 'PAID'
+    return NextResponse.json({ 
+      success: true, 
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id
     });
-
-    return NextResponse.json({ success: true, transaction: newTransaction });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ success: false, message: 'Payment failed' }, { status: 500 });
+    return NextResponse.json({ success: false, message: 'Payment initialization failed' }, { status: 500 });
   }
 }
 
