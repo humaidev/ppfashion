@@ -131,3 +131,86 @@ h6 {
   line-height: 1.1;
   vertical-align: bottom;
 }
+
+/* ── Luxury Quill Editor ── */
+
+.quill-luxury-editor .ql-container {
+  border: none !important;
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
+  color: white !important;
+  min-height: 150px;
+}
+
+.quill-luxury-editor .ql-toolbar {
+  border: none !important;
+  border-bottom: 1px solid rgba(232, 209, 150, 0.1) !important;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.quill-luxury-editor .ql-editor {
+  padding: 1.5rem 0 !important;
+  line-height: 1.8 !important;
+}
+
+.quill-luxury-editor .ql-editor.ql-blank::before {
+  color: rgba(255, 255, 255, 0.2) !important;
+  font-style: italic;
+  left: 0 !important;
+}
+
+.quill-luxury-editor .ql-snow .ql-stroke {
+  stroke: rgba(255, 255, 255, 0.4) !important;
+}
+
+.quill-luxury-editor .ql-snow .ql-fill {
+  fill: rgba(255, 255, 255, 0.4) !important;
+}
+
+.quill-luxury-editor .ql-snow .ql-picker {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.quill-luxury-editor .ql-snow .ql-picker-options {
+  background-color: #0F0F0F !important;
+  border: 1px solid rgba(232, 209, 150, 0.1) !important;
+}
+
+.quill-luxury-editor .ql-snow .ql-active .ql-stroke,
+.quill-luxury-editor .ql-snow .ql-active .ql-fill {
+  stroke: #E8D196 !important;
+  fill: #E8D196 !important;
+}
+
+/* ── Custom Luxury Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 15, 15, 0.9);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(198, 165, 92, 0.2);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(198, 165, 92, 0.5);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(232, 209, 150, 0.1);
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(232, 209, 150, 0.3);
+}
+
