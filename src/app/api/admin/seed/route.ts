@@ -71,8 +71,17 @@ export async function POST() {
         kycStatus: KYCStatus.PENDING,
         kycData: {
           businessName: "Elite Creations",
-          idNumber: "PASSPORT-12345",
-          country: "United Kingdom"
+          cnic: "12345-6789012-3",
+          category: "Couture",
+          experience: 5,
+          city: "London",
+          address: "123 Fashion St",
+          portfolioLinks: ["https://portfolio.example.com"],
+          documents: {
+            cnicFront: "https://via.placeholder.com/400x250",
+            cnicBack: "https://via.placeholder.com/400x250",
+            selfieWithCnic: "https://via.placeholder.com/400x250"
+          }
         }
       });
     }
@@ -87,7 +96,6 @@ export async function POST() {
           designer: testUser._id,
           event: firstEvent._id,
           status: 'PENDING',
-          portfolioLink: "https://portfolio.example.com",
           appliedAt: new Date()
         });
       }

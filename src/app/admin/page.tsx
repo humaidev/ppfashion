@@ -13,6 +13,7 @@ interface ISubscriber {
   brandName?: string;
   plan: string;
   status: string;
+  type?: string;
   createdAt: string;
 }
 
@@ -356,7 +357,7 @@ export default function AdminDashboard() {
                                         activeTab === 'blogs' ? 'Date / Excerpt' : 'Date / Venue'}
                         </th>
                         <th className="py-8 px-10 text-[9px] font-black uppercase tracking-widest text-white/40">
-                          {activeTab === 'subscribers' ? 'Tier Status' :
+                          {activeTab === 'newsletter' ? 'Tier Status' :
                             activeTab === 'events' ? 'Event Status' : 
                              activeTab === 'plans' ? 'Visibility' : 
                                activeTab === 'payments' ? 'Amount / Method' : 

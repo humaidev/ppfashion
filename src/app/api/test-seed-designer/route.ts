@@ -22,8 +22,9 @@ export async function GET() {
       kycStatus: KYCStatus.APPROVED,
       kycData: {
         businessName: 'Huma Luxury Collective',
+        cnic: '12345-6789012-3',
         category: 'Bridal Wear',
-        experience: '10 Years',
+        experience: 10,
         city: 'Lahore',
         address: 'Gulberg III, Lahore',
         documents: {
