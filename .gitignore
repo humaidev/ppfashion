@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# temporary
+/scratch
+/extract_images.mjs
+/extract_pdf.js
+/extract_pdf_2.js
+/public/pdf-images
+/public/pdf-text.txt
+
