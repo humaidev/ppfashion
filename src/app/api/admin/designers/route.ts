@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/dbConnect';
 import User, { UserRole, KYCStatus } from '@/models/User';
 import Designer from '@/models/Designer';
@@ -70,6 +71,18 @@ export async function POST(req: Request) {
     if (email && password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       
+      // Fetch plan to determine interval
+      const Plan = mongoose.models.Plan || mongoose.model('Plan', new mongoose.Schema({ name: String, interval: String }));
+      const planDoc = await Plan.findOne({ name: tier || 'Basic' });
+      const interval = planDoc?.interval || 'monthly';
+      
+      const expiryDate = new Date();
+      if (interval === 'yearly') {
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      } else {
+        expiryDate.setMonth(expiryDate.getMonth() + 1);
+      }
+
       const user = await User.create({
         name,
         email,
@@ -81,7 +94,7 @@ export async function POST(req: Request) {
           plan: tier || 'Basic',
           status: 'ACTIVE',
           startDate: new Date(),
-          expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+          expiryDate: expiryDate
         },
         kycData: {
           cnic,
@@ -135,6 +148,20 @@ export async function PUT(req: Request) {
         'portfolio.brandBio': bio,
         'portfolio.brandLogo': image
       };
+
+      // Fetch plan to determine interval for expiry
+      const Plan = mongoose.models.Plan || mongoose.model('Plan', new mongoose.Schema({ name: String, interval: String }));
+      const planDoc = await Plan.findOne({ name: tier || 'Basic' });
+      const interval = planDoc?.interval || 'monthly';
+      
+      const expiryDate = new Date();
+      if (interval === 'yearly') {
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      } else {
+        expiryDate.setMonth(expiryDate.getMonth() + 1);
+      }
+      
+      updatePayload['membership.expiryDate'] = expiryDate;
 
       if (portfolioLinks) {
         updatePayload['kycData.portfolioLinks'] = Array.isArray(portfolioLinks) ? portfolioLinks : portfolioLinks.split(',').map((l: string) => l.trim());

@@ -306,13 +306,13 @@ export default function AdminDashboard() {
         password: '', // Always empty on edit start
         businessName: item.businessName || '',
         specialty: item.specialty || '', 
-        experience: item.experience || '',
-        cnic: item.cnic || '',
-        passport: item.passport || '',
-        location: item.location || '', 
-        address: item.address || '',
-        tier: item.tier || 'Basic', 
-        image: item.image || '',
+        experience: item.experience || item.kycData?.experience || '',
+        cnic: item.cnic || item.kycData?.cnic || '',
+        passport: item.passport || item.kycData?.passport || '',
+        location: item.location || item.kycData?.city || '', 
+        address: item.address || item.kycData?.address || '',
+        tier: item.membership?.plan || item.tier || 'Basic', 
+        image: item.image || item.portfolio?.brandLogo || '',
         bio: item.bio || '', 
         logo: item.logo || '', 
         links: Array.isArray(item.links) ? item.links.join(', ') : (Array.isArray(item.portfolioLinks) ? item.portfolioLinks.join(', ') : (item.links || item.portfolioLinks || '')), 
@@ -360,6 +360,27 @@ export default function AdminDashboard() {
     setNewPlan({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
     setNewBlog({ title: '', excerpt: '', content: '', author: '', image: '' });
   };
+
+  async function handleRenew(id: string) {
+    const t = toast.loading("Renewing membership...");
+    try {
+      const res = await fetch('/api/admin/designers/renew', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Membership extended successfully", { id: t });
+        fetchData();
+        fetchStats();
+      } else {
+        toast.error(data.error || "Renewal failed", { id: t });
+      }
+    } catch (err) {
+      toast.error("Network error during renewal", { id: t });
+    }
+  }
 
   async function updateKYC(userId: string, status: string) {
     if (status === 'REJECTED') {
@@ -752,7 +773,7 @@ export default function AdminDashboard() {
                           <td className="py-10 px-10">
                             <p className="text-xs text-white/60 mb-1">{des.specialty || 'General'}</p>
                             <p className="text-[9px] font-bold uppercase tracking-widest text-secondary-emerald">
-                              {des.tier || 'Premium'} Member
+                              {des.tier || 'Standard'} Member
                             </p>
                           </td>
                           <td className="py-10 px-10">
@@ -762,6 +783,9 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-10 px-10 text-right">
                             <div className="flex justify-end gap-2 transition-opacity">
+                               <button onClick={() => handleRenew(des._id)} className="p-3 bg-secondary-emerald/10 border border-secondary-emerald/20 text-secondary-emerald hover:bg-secondary-emerald hover:text-white transition-all" title="Renew Membership">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                              </button>
                               <button onClick={() => openEdit(des)} className="p-3 bg-white/5 border border-white/10 text-white hover:border-primary-gold hover:text-primary-gold transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
                               <button onClick={() => setShowDeleteConfirm({ id: des._id, type: 'designers' })} className="p-3 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>

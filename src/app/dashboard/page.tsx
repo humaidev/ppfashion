@@ -422,7 +422,7 @@ export default function DesignerDashboard() {
                 <div className="p-6 bg-primary-gold/5 border border-primary-gold/10 relative group overflow-hidden">
                   <p className="text-[9px] uppercase tracking-widest text-primary-gold/50 font-black mb-2">Active Plan</p>
                   <p className="text-3xl font-serif font-bold italic text-primary-gold group-hover:scale-105 transition-all origin-left">
-                    {user?.membership?.plan === 'NONE' ? 'Standard Collective' : user?.membership?.plan}
+                    {user?.membership?.plan && user.membership.plan !== 'NONE' ? `${user.membership.plan} Collective` : 'Standard Collective'}
                   </p>
                   <div className="mt-6 pt-6 border-t border-primary-gold/10 flex items-center justify-between">
                      <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Status</span>
@@ -438,7 +438,16 @@ export default function DesignerDashboard() {
                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-6">Renewal Intelligence</p>
                    <div className="flex justify-between items-end">
                       <div>
-                         <p className="text-xl font-serif font-bold text-white">28 Days</p>
+                         <p className="text-xl font-serif font-bold text-white">
+                           {(() => {
+                             if (!user?.membership?.expiryDate) return '--';
+                             const expiry = new Date(user.membership.expiryDate);
+                             const now = new Date();
+                             const diff = expiry.getTime() - now.getTime();
+                             const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                             return days > 0 ? days : '0';
+                           })()} Days
+                         </p>
                          <p className="text-[8px] uppercase tracking-widest text-white/30 font-bold mt-1 italic">until cycle end</p>
                       </div>
                       <Link href="/membership" className="text-[9px] font-black uppercase tracking-widest text-primary-gold hover:text-white transition-colors">Manage →</Link>
