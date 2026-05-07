@@ -56,7 +56,8 @@ interface IBlog {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'newsletter' | 'membership' | 'kyc' | 'eventApps' | 'designers' | 'payments' | 'events' | 'blogs' | 'plans' | 'gallery'>('newsletter');
+  const [activeTab, setActiveTab] = useState<'newsletter' | 'kyc' | 'eventApps' | 'membership' | 'designers' | 'payments' | 'events' | 'blogs' | 'gallery' | 'plans'>('newsletter');
+  const [editMode, setEditMode] = useState<string | null>(null);
   const [subscribers, setSubscribers] = useState<ISubscriber[]>([]);
   const [designers, setDesigners] = useState<IDesigner[]>([]);
   const [events, setEvents] = useState<IEvent[]>([]);
@@ -76,7 +77,6 @@ export default function AdminDashboard() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ id: string, type: string } | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState<{ id: string, type: 'kyc' | 'eventApp' } | null>(null);
   const [feedbackText, setFeedbackText] = useState("");
-  const [editMode, setEditMode] = useState<string | null>(null);
   const router = useRouter();
 
   const [newDesigner, setNewDesigner] = useState({ name: '', specialty: '', tier: 'Premium' as any, location: '', image: '', bio: '', logo: '', links: '', collections: '' });
@@ -190,12 +190,7 @@ export default function AdminDashboard() {
         toast.success(editMode ? "Record updated successfully" : "New record initialized", { id: t });
         setShowAddForm(false);
         setEditMode(null);
-        // Reset all forms
-        setNewDesigner({ name: '', specialty: '', tier: 'Premium', location: '', image: '' });
-        setNewEvent({ title: '', startDate: '', endDate: '', location: '', type: '', price: '', status: 'Applications Open', image: '' });
-        setNewPlan({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
-        setNewBlog({ title: '', excerpt: '', content: '', author: '', image: '' });
-        setNewGalleryItem({ imageUrl: '', title: '', category: '' });
+        resetForms();
         fetchData();
 
       } else {
@@ -213,6 +208,7 @@ export default function AdminDashboard() {
                      type === 'events' ? `/api/admin/events?id=${id}` :
                      type === 'blogs' ? `/api/admin/blogs?id=${id}` :
                      type === 'gallery' ? `/api/admin/gallery?id=${id}` :
+                     type === 'subscribers' ? `/api/admin/subscribers?id=${id}` :
                      `/api/admin/plans?id=${id}`;
 
 
@@ -259,6 +255,75 @@ export default function AdminDashboard() {
     setShowAddForm(true);
   };
 
+  const resetForms = () => {
+    setNewDesigner({ name: '', specialty: '', tier: 'Premium', location: '', image: '', bio: '', logo: '', links: '', collections: '' });
+    setNewEvent({ title: '', startDate: '', endDate: '', location: '', type: '', price: '', status: 'Applications Open', image: '' });
+    setNewPlan({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
+    setNewBlog({ title: '', excerpt: '', content: '', author: '', image: '' });
+    setNewGalleryItem({ imageUrl: '', title: '', category: '' });
+  };
+
+  async function updateKYC(userId: string, status: string) {
+    if (status === 'REJECTED') {
+      setShowFeedbackModal({ id: userId, type: 'kyc' });
+      return;
+    }
+
+    const t = toast.loading("Updating status...");
+    try {
+      await fetch('/api/admin/kyc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, status })
+      });
+      toast.success(`User successfully ${status.toLowerCase()}`, { id: t });
+      fetchData();
+    } catch (err) {
+      toast.error("Update failed", { id: t });
+    }
+  }
+
+  async function submitFeedback() {
+    if (!showFeedbackModal || !feedbackText) return;
+    const { id, type } = showFeedbackModal;
+    const endpoint = type === 'kyc' ? '/api/admin/kyc' : '/api/admin/event-applications';
+
+    const t = toast.loading("Submitting feedback...");
+    try {
+      await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [type === 'kyc' ? 'userId' : 'applicationId']: id, status: 'REJECTED', feedback: feedbackText })
+      });
+      toast.success("Feedback delivered successfully", { id: t });
+      setShowFeedbackModal(null);
+      setFeedbackText("");
+      fetchData();
+    } catch (err) {
+      toast.error("Feedback delivery failed", { id: t });
+    }
+  }
+
+  async function updateEventApp(applicationId: string, status: string) {
+    if (status === 'REJECTED') {
+      setShowFeedbackModal({ id: applicationId, type: 'eventApp' });
+      return;
+    }
+
+    const t = toast.loading("Processing...");
+    try {
+      await fetch('/api/admin/event-applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId, status })
+      });
+      toast.success(`Application successfully ${status.toLowerCase()}`, { id: t });
+      fetchData();
+    } catch (err) {
+      toast.error("Update failed", { id: t });
+    }
+  }
+
   return (
     <div className="min-h-screen bg-luxury-black text-white py-12 px-6 overflow-hidden relative">
       <Toaster position="top-right" toastOptions={{ style: { background: '#0A0A0A', color: '#fff', border: '1px solid rgba(232, 209, 150, 0.2)', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' } }} />
@@ -269,11 +334,11 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto max-w-7xl relative z-10">
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
+        <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 lg:mb-16 gap-6 lg:gap-8">
           <div>
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <h1 className="text-primary-gold font-bold uppercase tracking-[0.6em] text-[10px] mb-4">Command Center</h1>
-              <h2 className="text-5xl font-serif font-bold tracking-tighter uppercase leading-[0.85]">Registry <br />Management</h2>
+              <h1 className="text-primary-gold font-bold uppercase tracking-[0.6em] text-[8px] lg:text-[10px] mb-2 lg:mb-4">Command Center</h1>
+              <h2 className="text-3xl lg:text-5xl font-serif font-bold tracking-tighter uppercase leading-[0.85]">Registry <br className="hidden lg:block" />Management</h2>
             </motion.div>
           </div>
           <div className="flex items-center gap-6">
@@ -287,8 +352,10 @@ export default function AdminDashboard() {
           </div>
         </header>
 
+
+
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10 lg:mb-16">
           {[
             { label: 'Pending KYC', val: kycApps.length, color: 'text-primary-gold' },
             { id: 'revenue', label: 'Global Revenue', val: `£${payments.reduce((acc, curr) => acc + (parseFloat(curr.amount?.replace(/\D/g, '') || '0')), 0)}`, color: 'text-secondary-emerald' },
@@ -300,18 +367,18 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white/[0.02] border border-white/5 p-8 rounded-sm hover:border-white/10 transition-colors"
+              className="bg-white/[0.02] border border-white/5 p-4 lg:p-8 rounded-sm hover:border-white/10 transition-colors"
             >
-              <p className="text-[10px] uppercase tracking-widest font-bold opacity-30 mb-4">{stat.label}</p>
-              <p className={`text-4xl font-serif font-bold ${stat.color}`}>{stat.val}</p>
+              <p className="text-[8px] lg:text-[10px] uppercase tracking-widest font-bold opacity-30 mb-2 lg:mb-4">{stat.label}</p>
+              <p className={`text-xl lg:text-4xl font-serif font-bold ${stat.color}`}>{stat.val}</p>
             </motion.div>
           ))}
         </div>
 
         {/* Navigation Sidebar Layout */}
         <div className="flex flex-col lg:flex-row gap-12">
-          {/* Tabs Menu */}
-          <div className="lg:w-64 flex flex-col gap-2">
+          {/* Tabs Menu - Horizontal Scroll on Mobile, Vertical on Desktop */}
+          <div className="lg:w-64 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 no-scrollbar sticky top-0 z-40 bg-luxury-black/80 backdrop-blur-lg lg:bg-transparent lg:static">
             {[
               { id: 'newsletter', label: 'Newsletter', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
               { id: 'kyc', label: 'KYC Queue', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
@@ -322,18 +389,17 @@ export default function AdminDashboard() {
               { id: 'events', label: 'Global Events', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z' },
               { id: 'blogs', label: 'Journal / Blog', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
               { id: 'gallery', label: 'Image Gallery', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
-              { id: 'plans', label: 'Membership Plans Registry', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
-
+              { id: 'plans', label: 'Membership Plans', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-4 px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-l-2 ${activeTab === tab.id
+                className={`flex items-center gap-3 lg:gap-4 px-4 lg:px-6 py-4 lg:py-5 text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 lg:border-b-0 lg:border-l-2 whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
                   ? 'bg-primary-gold/10 border-primary-gold text-primary-gold'
                   : 'bg-transparent border-transparent text-white/30 hover:bg-white/5 hover:text-white'
                   }`}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={tab.icon} /></svg>
+                <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d={tab.icon} /></svg>
                 {tab.label}
               </button>
             ))}
@@ -358,6 +424,7 @@ export default function AdminDashboard() {
                       setActiveTab('plans');
                     } else {
                       setEditMode(null); 
+                      resetForms();
                       setShowAddForm(true); 
                     }
                   }}
@@ -905,41 +972,66 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ) : (
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <input type="text" placeholder="Plan Name (e.g. Elite Collective)" required className="admin-input col-span-2" value={newPlan.name} onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })} />
-                    
-                    <div className="flex gap-2">
-                       <select className="admin-input bg-luxury-black w-24" value={newPlan.currency} onChange={(e) => setNewPlan({ ...newPlan, currency: e.target.value })}>
-                         <option value="£">£ (GBP)</option>
-                         <option value="$">$ (USD)</option>
-                         <option value="€">€ (EUR)</option>
-                         <option value="PKR">PKR</option>
-                       </select>
-                       <input type="text" placeholder="Price (e.g. 199)" required className="admin-input flex-1" value={newPlan.price} onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="col-span-2">
+                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">Plan Designation</label>
+                       <input type="text" placeholder="e.g. Elite Collective" required className="admin-input" value={newPlan.name} onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })} />
                     </div>
                     
-                    <select className="admin-input bg-luxury-black" value={newPlan.interval} onChange={(e) => setNewPlan({ ...newPlan, interval: e.target.value as any })}>
-                      <option value="monthly">Monthly Billing</option>
-                      <option value="yearly">Yearly Billing</option>
-                    </select>
-
-                    <input type="text" placeholder="Short Description" required className="admin-input col-span-2" value={newPlan.description} onChange={(e) => setNewPlan({ ...newPlan, description: e.target.value })} />
+                    <div className="space-y-4">
+                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Financial Configuration</label>
+                       <div className="flex gap-4">
+                          <div className="w-28 relative">
+                             <span className="absolute -top-3 left-0 text-[7px] uppercase text-primary-gold/60 font-bold">Currency</span>
+                             <select className="admin-input bg-luxury-black" value={newPlan.currency} onChange={(e) => setNewPlan({ ...newPlan, currency: e.target.value })}>
+                               <option value="£">£ (GBP)</option>
+                               <option value="$">$ (USD)</option>
+                               <option value="€">€ (EUR)</option>
+                               <option value="PKR">PKR</option>
+                             </select>
+                          </div>
+                          <div className="flex-1 relative">
+                             <span className="absolute -top-3 left-0 text-[7px] uppercase text-primary-gold/60 font-bold">Rate / Price</span>
+                             <input type="number" placeholder="0.00" required className="admin-input" value={newPlan.price} onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })} />
+                          </div>
+                       </div>
+                    </div>
                     
-                    <div className="col-span-2 space-y-2">
-                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Plan Features (Comma separated)</label>
+                    <div className="space-y-4">
+                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Billing Cycle</label>
+                       <div className="relative">
+                          <span className="absolute -top-3 left-0 text-[7px] uppercase text-primary-gold/60 font-bold">Frequency</span>
+                          <select className="admin-input bg-luxury-black" value={newPlan.interval} onChange={(e) => setNewPlan({ ...newPlan, interval: e.target.value as any })}>
+                            <option value="monthly">Monthly Recurring</option>
+                            <option value="yearly">Annual Commitment</option>
+                          </select>
+                       </div>
+                    </div>
+
+                    <div className="col-span-2">
+                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">Value Proposition / Description</label>
+                       <input type="text" placeholder="Short description of the plan's primary value..." required className="admin-input" value={newPlan.description} onChange={(e) => setNewPlan({ ...newPlan, description: e.target.value })} />
+                    </div>
+                    
+                    <div className="col-span-2 space-y-4">
+                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Exclusive Features (Comma separated)</label>
                       <textarea 
-                       placeholder="Feature 1, Feature 2, Feature 3..." 
-                       className="w-full bg-transparent border-b border-white/10 py-1 text-white focus:outline-none focus:border-primary-gold transition-all text-sm"
+                       placeholder="e.g. VIP Access, Portfolio Review, Global Showcase..." 
+                       className="w-full bg-transparent border-b border-white/10 py-4 text-white focus:outline-none focus:border-primary-gold transition-all text-sm min-h-[80px]"
                        value={newPlan.features}
                        onChange={(e) => setNewPlan({ ...newPlan, features: e.target.value })}
                       />
                     </div>
 
-                    <label className="flex items-center gap-4 cursor-pointer col-span-2">
-                      <input type="checkbox" checked={newPlan.isPopular} onChange={(e) => setNewPlan({ ...newPlan, isPopular: e.target.checked })} className="w-4 h-4 accent-primary-gold" />
-                      <span className="text-[10px] uppercase tracking-widest text-white/60 font-bold">Feature as 'Most Popular'</span>
-                    </label>
+                    <div className="col-span-2">
+                      <label className="flex items-center gap-6 cursor-pointer p-4 bg-white/[0.02] border border-white/5 hover:border-primary-gold/30 transition-all group">
+                        <input type="checkbox" checked={newPlan.isPopular} onChange={(e) => setNewPlan({ ...newPlan, isPopular: e.target.checked })} className="w-5 h-5 accent-primary-gold" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-widest text-white font-bold mb-1">Highlight as Featured</p>
+                          <p className="text-[8px] uppercase tracking-widest text-white/20">Mark as the 'Most Popular' choice for designers</p>
+                        </div>
+                      </label>
+                    </div>
                   </div>
                 )}
 
@@ -1058,6 +1150,14 @@ export default function AdminDashboard() {
           outline: none;
           border-color: #E8D196;
         }
+        .admin-input::placeholder {
+          color: rgba(255, 255, 255, 0.15);
+          font-style: italic;
+          font-weight: 300;
+        }
+        textarea::placeholder {
+          color: rgba(255, 255, 255, 0.15);
+        }
         select.admin-input option {
           background: #0A0A0A;
           color: white;
@@ -1072,69 +1172,15 @@ export default function AdminDashboard() {
           background-size: 1.5rem;
           padding-right: 2rem;
         }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
       `}</style>
     </div>
   );
 
-  // Helper Functions for Inline Actions
-  async function updateKYC(userId: string, status: string) {
-    if (status === 'REJECTED') {
-      setShowFeedbackModal({ id: userId, type: 'kyc' });
-      return;
-    }
-
-    const t = toast.loading("Updating status...");
-    try {
-      await fetch('/api/admin/kyc', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, status })
-      });
-      toast.success(`User successfully ${status.toLowerCase()}`, { id: t });
-      fetchData();
-    } catch (err) {
-      toast.error("Update failed", { id: t });
-    }
-  }
-
-  async function submitFeedback() {
-    if (!showFeedbackModal || !feedbackText) return;
-    const { id, type } = showFeedbackModal;
-    const endpoint = type === 'kyc' ? '/api/admin/kyc' : '/api/admin/event-applications';
-
-    const t = toast.loading("Submitting feedback...");
-    try {
-      await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [type === 'kyc' ? 'userId' : 'applicationId']: id, status: 'REJECTED', feedback: feedbackText })
-      });
-      toast.success("Feedback delivered successfully", { id: t });
-      setShowFeedbackModal(null);
-      setFeedbackText("");
-      fetchData();
-    } catch (err) {
-      toast.error("Feedback delivery failed", { id: t });
-    }
-  }
-
-  async function updateEventApp(applicationId: string, status: string) {
-    if (status === 'REJECTED') {
-      setShowFeedbackModal({ id: applicationId, type: 'eventApp' });
-      return;
-    }
-
-    const t = toast.loading("Processing...");
-    try {
-      await fetch('/api/admin/event-applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId, status })
-      });
-      toast.success(`Application successfully ${status.toLowerCase()}`, { id: t });
-      fetchData();
-    } catch (err) {
-      toast.error("Update failed", { id: t });
-    }
-  }
 }

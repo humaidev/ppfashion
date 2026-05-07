@@ -33,8 +33,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 403 });
     }
 
-    const { name, price, interval, description, features, isPopular } = await req.json();
-    const newPlan = await Plan.create({ name, price, interval, description, features, isPopular });
+    const { name, price, currency, interval, description, features, isPopular } = await req.json();
+    const newPlan = await Plan.create({ name, price, currency, interval, description, features, isPopular });
 
     return NextResponse.json({ success: true, plan: newPlan });
   } catch (error) {

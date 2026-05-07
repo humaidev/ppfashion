@@ -58,6 +58,17 @@ export interface IUser extends Document {
     paymentMethod?: string;
   };
 
+  // Portfolio / Brand Info
+  portfolio?: {
+    brandBio: string;
+    images: string[]; // URLs of collection images
+    brandLogo?: string;
+    socialLinks?: {
+      instagram?: string;
+      website?: string;
+    }
+  };
+
   // Verification
   isEmailVerified: boolean;
   verificationCode?: string;
@@ -102,6 +113,16 @@ const UserSchema: Schema = new Schema(
       stripeCustomerId: String,
       cardLast4: String,
       paymentMethod: String,
+    },
+
+    portfolio: {
+      brandBio: String,
+      images: [String],
+      brandLogo: String,
+      socialLinks: {
+        instagram: String,
+        website: String,
+      }
     },
 
     isEmailVerified: { type: Boolean, default: false },

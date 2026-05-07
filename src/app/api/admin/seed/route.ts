@@ -39,7 +39,7 @@ export async function POST() {
     // Seed Designers
     for (const d of initialDesigners) {
       const existing = await Designer.findOne({ name: d.name });
-      if (!existing) await Designer.create(d);
+      if (!existing) await Designer.create(d as any);
     }
 
     // Seed Events
@@ -57,25 +57,32 @@ export async function POST() {
     // Seed Subscribers
     for (const s of initialSubscribers) {
       const existing = await Subscriber.findOne({ email: s.email });
-      if (!existing) await Subscriber.create(s);
+      if (!existing) await Subscriber.create(s as any);
     }
 
-    // Seed some KYC Applications (Users with PENDING status)
-    const kycCount = await User.countDocuments({ kycStatus: KYCStatus.PENDING });
-    if (kycCount === 0) {
+    // Seed a working test Designer for login verification
+    const testDesigner = await User.findOne({ email: "designer@test.com" });
+    if (!testDesigner) {
       await User.create({
-        name: "Test Applicant",
-        email: "applicant@test.com",
-        password: "hashed_password",
+        name: "Designer Prototype",
+        email: "designer@test.com",
+        password: "$2b$10$DlH44loQZsitxRPvJN17YuLylwlBFwWosMrFoXzjNiFrzA3K/ofQC", // password123
         role: UserRole.DESIGNER,
-        kycStatus: KYCStatus.PENDING,
+        kycStatus: KYCStatus.APPROVED,
+        isEmailVerified: true,
+        membership: {
+          plan: 'Elite',
+          status: 'ACTIVE',
+          cardLast4: '4242',
+          paymentMethod: 'Visa'
+        },
         kycData: {
-          businessName: "Elite Creations",
+          businessName: "Midnight Couture",
           cnic: "12345-6789012-3",
-          category: "Couture",
-          experience: 5,
+          category: "Luxury Bridal",
+          experience: 10,
           city: "London",
-          address: "123 Fashion St",
+          address: "123 Fashion Street, Mayfair",
           portfolioLinks: ["https://portfolio.example.com"],
           documents: {
             cnicFront: "https://via.placeholder.com/400x250",
@@ -89,13 +96,13 @@ export async function POST() {
     // Seed some Event Applications
     const appCount = await EventApplication.countDocuments();
     if (appCount === 0) {
-      const testUser = await User.findOne({ email: "applicant@test.com" });
+      const testUser = await User.findOne({ email: "designer@test.com" });
       const firstEvent = await Event.findOne();
       if (testUser && firstEvent) {
         await EventApplication.create({
           designer: testUser._id,
           event: firstEvent._id,
-          status: 'PENDING',
+          status: 'PENDING' as any,
           appliedAt: new Date()
         });
       }

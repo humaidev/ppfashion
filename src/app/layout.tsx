@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({
   children,
@@ -42,6 +43,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Navbar />
+        <Toaster position="bottom-right" toastOptions={{ style: { background: '#111', color: '#fff', border: '1px solid rgba(232,209,150,0.1)' } }} />
         <main className="flex-1 pt-24">
           {children}
         </main>

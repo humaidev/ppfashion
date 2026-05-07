@@ -4,6 +4,7 @@ import dbConnect from '@/lib/dbConnect';
 import Transaction, { TransactionStatus } from '@/models/Transaction';
 import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
+import { sendPaymentConfirmationEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -42,15 +43,26 @@ export async function POST(req: Request) {
     });
 
     // 2. Update User Membership
-    await User.findByIdAndUpdate(decoded.id, {
+    const updatedUser = await User.findByIdAndUpdate(decoded.id, {
       "membership.plan": planName,
       "membership.status": 'ACTIVE',
       "membership.startDate": new Date(),
+      "membership.expiryDate": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
       "membership.cardLast4": (paymentIntent as any).charges?.data[0]?.payment_method_details?.card?.last4 || 'XXXX',
       "membership.paymentMethod": (paymentIntent as any).charges?.data[0]?.payment_method_details?.card?.brand || 'Stripe',
       membershipTier: 'PAID',
       paymentStatus: 'PAID'
-    });
+    }, { new: true });
+
+    // 3. Dispatch Email
+    if (updatedUser?.email) {
+      await sendPaymentConfirmationEmail(
+        updatedUser.email, 
+        planName, 
+        paymentIntent.amount / 100,
+        updatedUser.membership.cardLast4 || 'XXXX'
+      );
+    }
 
     return NextResponse.json({ success: true, transaction });
   } catch (error: any) {

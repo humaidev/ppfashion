@@ -45,3 +45,62 @@ export const sendVerificationEmail = async (email: string, code: string) => {
     return { success: false, error };
   }
 };
+
+export const sendPaymentConfirmationEmail = async (email: string, planName: string, amount: number, cardLast4: string) => {
+  const mailOptions = {
+    from: `"PPFashion Luxury" <${process.env.EMAIL_FROM || 'noreply@ppfashion.com'}>`,
+    to: email,
+    subject: 'Confirmation: Your Elite Membership is Active',
+    html: `
+      <div style="font-family: 'serif', 'Times New Roman', serif; background-color: #050505; color: #ffffff; padding: 60px; max-width: 600px; margin: 0 auto; border: 1px solid #e8d19620;">
+        <h1 style="color: #e8d196; text-transform: uppercase; letter-spacing: 0.4em; font-size: 10px; margin-bottom: 20px;">Payment Confirmed</h1>
+        <h2 style="font-size: 32px; font-weight: bold; margin-bottom: 30px; letter-spacing: -0.05em;">Welcome to the Inner Circle</h2>
+        <p style="color: rgba(255,255,255,0.6); font-size: 14px; line-height: 1.6; margin-bottom: 40px;">
+          Your transition to the <strong>${planName}</strong> plan is complete. Your status in the collective has been elevated.
+        </p>
+        <div style="background-color: rgba(232,209,150,0.05); border-left: 4px solid #e8d196; padding: 30px; margin-bottom: 40px;">
+          <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); margin: 0 0 10px 0;">Transaction Details</p>
+          <p style="font-size: 18px; color: #ffffff; margin: 0;">Plan: ${planName}</p>
+          <p style="font-size: 18px; color: #ffffff; margin: 5px 0 0 0;">Amount: £${amount}</p>
+          <p style="font-size: 12px; color: rgba(255,255,255,0.3); margin: 10px 0 0 0;">Card ending in: ${cardLast4}</p>
+        </div>
+        <p style="color: rgba(255,255,255,0.4); font-size: 12px; line-height: 1.6;">
+          Your benefits are now active. You can apply for upcoming shows and manage your digital dossier immediately.
+        </p>
+        <div style="margin-top: 60px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+          <p style="color: #e8d196; font-size: 12px; font-weight: bold;">PASSION FOR PAKISTANI FASHION</p>
+          <p style="color: rgba(255,255,255,0.4); font-size: 10px;">The Elite Global Collective</p>
+        </div>
+      </div>
+    `,
+  };
+  return transporter.sendMail(mailOptions);
+};
+
+export const sendExpiryReminderEmail = async (email: string, daysLeft: number) => {
+  const mailOptions = {
+    from: `"PPFashion Maintenance" <${process.env.EMAIL_FROM || 'noreply@ppfashion.com'}>`,
+    to: email,
+    subject: 'Urgent: Membership Renewal Notice',
+    html: `
+      <div style="font-family: 'serif', 'Times New Roman', serif; background-color: #050505; color: #ffffff; padding: 60px; max-width: 600px; margin: 0 auto; border: 1px solid #e8d19620;">
+        <h1 style="color: #ff4d4d; text-transform: uppercase; letter-spacing: 0.4em; font-size: 10px; margin-bottom: 20px;">Membership Intelligence</h1>
+        <h2 style="font-size: 32px; font-weight: bold; margin-bottom: 30px; letter-spacing: -0.05em;">Maintain Your Visibility</h2>
+        <p style="color: rgba(255,255,255,0.6); font-size: 14px; line-height: 1.6; margin-bottom: 40px;">
+          Our system indicates that your elite membership will expire in <strong>${daysLeft} days</strong>. To ensure uninterrupted access to the collective and maintain your listings, please renew your plan.
+        </p>
+        <div style="text-align: center; margin-bottom: 40px;">
+          <a href="${process.env.NEXT_PUBLIC_URL}/membership" style="background-color: #e8d196; color: #050505; text-decoration: none; padding: 20px 40px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.2em; font-size: 12px; display: inline-block;">Renew Membership</a>
+        </div>
+        <p style="color: rgba(255,255,255,0.3); font-size: 11px; font-style: italic;">
+          Note: Expired accounts are temporarily delisted from the public directory until renewal is completed.
+        </p>
+        <div style="margin-top: 60px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+          <p style="color: #e8d196; font-size: 12px; font-weight: bold;">PASSION FOR PAKISTANI FASHION</p>
+          <p style="color: rgba(255,255,255,0.4); font-size: 10px;">The Elite Global Collective</p>
+        </div>
+      </div>
+    `,
+  };
+  return transporter.sendMail(mailOptions);
+};
