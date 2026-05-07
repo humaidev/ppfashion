@@ -48,7 +48,7 @@ export default function Home() {
             <h2 className="text-white font-bold uppercase tracking-[0.4em] mb-1 md:mb-4 text-[10px] md:text-sm opacity-80">
               Membership Program
             </h2>
-            <h1 className="text-7xl md:text-[9.5rem] font-serif font-bold mb-4 md:mb-6 leading-[0.8] md:leading-[0.8] tracking-tighter">
+            <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-[9.5rem] font-serif font-bold mb-4 md:mb-6 leading-[0.8] md:leading-[0.8] tracking-tighter">
               <span className="text-white inline-block">Couture</span> <br />
               <motion.span
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -59,7 +59,7 @@ export default function Home() {
                 Excellence.
               </motion.span>
             </h1>
-            <p className="text-lg md:text-2xl text-white/90 mb-6 md:mb-8 max-w-2xl leading-relaxed">
+            <p className="text-base md:text-2xl text-white/90 mb-6 md:mb-8 max-w-2xl leading-relaxed">
               Join the elite circle of 50+ leading designers. Unlock priority access to
               runway shows, global networking, and exclusive opportunities.
             </p>
@@ -78,9 +78,9 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="w-full border-t border-primary-gold/20 md:border-t-0 md:border-l md:pl-8 pt-10 md:pt-0 mt-12 md:mt-0 flex flex-col items-center md:items-start">
-              <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 mb-8 md:mb-6">Established Presence Across</p>
-              <div className="grid grid-cols-2 md:flex md:flex-wrap gap-x-8 md:gap-x-12 gap-y-8 md:gap-y-4 text-[11px] md:text-[10px] font-black text-white/80 uppercase tracking-[0.4em] w-full max-w-[320px] md:max-w-none">
+            <div className="w-full border-t border-primary-gold/20 md:border-t-0 md:border-l md:pl-8 pt-10 md:pt-0 mt-12 md:mt-0 flex flex-col items-center md:items-start overflow-hidden">
+              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.5em] text-white/40 mb-8 md:mb-6">Global Presence</p>
+              <div className="grid grid-cols-2 md:flex md:flex-wrap gap-x-6 md:gap-x-12 gap-y-8 md:gap-y-4 text-[10px] md:text-[10px] font-black text-white/80 uppercase tracking-[0.3em] md:tracking-[0.4em] w-full max-w-[280px] md:max-w-none">
                 {["London", "Glasgow", "Manchester", "Dubai", "Lahore"].map((city, idx) => (
                   <motion.div
                     key={city}
@@ -88,11 +88,10 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 + (idx * 0.1) }}
                     viewport={{ once: true }}
-                    className={`flex items-center justify-center md:justify-start ${idx === 4 ? 'col-span-2' : ''}`}
+                    className="flex items-center justify-center md:justify-start"
                   >
-                    <span className="relative group cursor-default transition-colors hover:text-primary-gold">
+                    <span className="relative group cursor-default transition-colors hover:text-primary-gold truncate">
                       {city}
-                      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 w-0 h-[1px] bg-primary-gold/50 transition-all duration-300 group-hover:w-full"></span>
                     </span>
                   </motion.div>
                 ))}
@@ -123,15 +122,14 @@ export default function Home() {
           <div className="absolute inset-0 bg-luxury-black/80"></div>
         </div>
         <div className="container mx-auto px-6 relative z-10">
-          <AnimatedSection className="border border-primary-gold/30 p-12 md:p-24 bg-luxury-black/60 backdrop-blur-md relative overflow-hidden group hover:border-primary-gold/60 transition-colors duration-500">
-             <div className="absolute top-0 right-0 p-6 md:p-10">
-               <span className="brand-gradient text-white text-[10px] font-black uppercase tracking-[0.4em] px-6 py-3 shadow-[0_0_30px_rgba(0,79,52,0.4)] block">
-                 June 6th - 7th, 2026
-               </span>
+          <AnimatedSection className="border border-primary-gold/30 p-8 md:p-16 lg:p-24 bg-luxury-black/60 backdrop-blur-md relative overflow-hidden group hover:border-primary-gold/60 transition-colors duration-500">
+             <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
+                <h3 className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[12px]">Pride of the Nation</h3>
+                <span className="brand-gradient text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] px-6 py-3 shadow-[0_0_30px_rgba(0,79,52,0.4)]">
+                  June 6th - 7th, 2026
+                </span>
              </div>
-             
-             <h3 className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[12px] mb-4">Pride of the Nation</h3>
-             <h2 className="text-4xl md:text-7xl font-serif font-bold text-white mb-6 leading-[1.1] tracking-tighter">
+             <h2 className="text-4xl md:text-5xl lg:text-7xl font-serif font-bold text-white mb-6 leading-[1.1] tracking-tighter">
                Fashion Show, <br className="hidden md:block"/>
                <span className="italic font-light gold-gradient-text">Exhibition</span> & Award Ceremony
              </h2>
@@ -190,8 +188,8 @@ export default function Home() {
               { label: "Based Operations", val: "UK" },
               { label: "Global Reach", val: "10k+" },
             ].map((stat, i) => (
-              <motion.div key={i} variants={itemVariants} className="flex flex-col items-center border-r border-white/5 lg:last:border-0">
-                <div className="text-5xl md:text-8xl font-serif font-bold gold-gradient-text mb-4 tracking-tighter">{stat.val}</div>
+              <motion.div key={i} variants={itemVariants} className={`flex flex-col items-center ${i % 2 === 0 ? 'border-r' : 'lg:border-r'} border-white/5 last:border-0`}>
+                <div className="text-4xl md:text-8xl font-serif font-bold gold-gradient-text mb-4 tracking-tighter">{stat.val}</div>
                 <div className="text-white/60 uppercase tracking-[0.4em] text-[9px] font-black">{stat.label}</div>
               </motion.div>
             ))}
@@ -222,7 +220,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-48 bg-luxury-black relative overflow-hidden border-t border-white/5">
         <AnimatedSection className="container mx-auto px-6 relative z-10 text-center max-w-5xl">
-          <h2 className="text-5xl md:text-[7rem] font-serif font-bold text-white mb-12 leading-[0.9] tracking-tighter">
+          <h2 className="text-4xl md:text-[7rem] font-serif font-bold text-white mb-12 leading-[0.9] tracking-tighter">
             Build Your <br />
             <span className="gold-gradient-text italic font-light">Legacy.</span>
           </h2>

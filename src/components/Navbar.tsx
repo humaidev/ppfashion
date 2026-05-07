@@ -94,7 +94,7 @@ export default function Navbar() {
               <Link
                 key={link.name}
                 href={link.href}
-                className={`nav-link-hover text-[13px] font-bold hover:text-primary-gold transition-colors uppercase tracking-[0.2em] ${isScrolled ? "text-white/90" : "text-white"}`}
+                className={`nav-link-hover text-[11px] font-bold hover:text-primary-gold transition-colors uppercase tracking-[0.2em] ${isScrolled ? "text-white/90" : "text-white"}`}
               >
                 {link.name}
               </Link>
@@ -198,9 +198,9 @@ export default function Navbar() {
             >
               <div className="flex flex-col h-full p-8">
                 <div className="flex justify-between items-center mb-10">
-                  <div className="bg-white p-1 rounded-sm">
+                  <Link href="/" onClick={() => setIsMenuOpen(false)} className="bg-white p-1 rounded-sm">
                     <Image src="/pp.jpeg" alt="Logo" width={130} height={30} className="object-contain mix-blend-multiply" />
-                  </div>
+                  </Link>
                   <button onClick={() => setIsMenuOpen(false)} className="text-black p-2 hover:bg-black/5 rounded-full transition-colors">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -223,15 +223,24 @@ export default function Navbar() {
 
                 <div className="flex flex-col space-y-4 pt-10 border-t border-black/5 mt-8">
                   {isLoggedIn ? (
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full text-center text-sm font-bold text-red-500 py-4 border border-red-500/10 rounded-sm uppercase tracking-widest hover:bg-red-500/5 transition-all"
-                    >
-                      Logout
-                    </button>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                       <Link 
+                         href={userRole === 'ADMIN' ? "/admin" : "/dashboard"} 
+                         className="text-center text-[10px] font-black uppercase tracking-widest text-black/70 py-4 border border-black/10 rounded-sm hover:text-black"
+                         onClick={() => setIsMenuOpen(false)}
+                       >
+                         Dashboard
+                       </Link>
+                       <button
+                         onClick={() => {
+                           handleLogout();
+                           setIsMenuOpen(false);
+                         }}
+                         className="text-center text-[10px] font-black uppercase tracking-widest text-red-500 py-4 border border-red-500/20 rounded-sm"
+                       >
+                         Logout
+                       </button>
+                    </div>
                   ) : (
                     <Link
                       href="/login"
@@ -241,7 +250,7 @@ export default function Navbar() {
                       Log in
                     </Link>
                   )}
-                  <Link href="/membership" className="w-full text-center brand-gradient text-white font-bold py-5 rounded-sm uppercase tracking-widest text-[11px] shadow-lg shadow-primary-gold/20">Become a Member</Link>
+                  <Link href="/membership" className="w-full text-center brand-gradient text-white font-bold py-5 rounded-sm uppercase tracking-widest text-[11px] shadow-lg shadow-primary-gold/20" onClick={() => setIsMenuOpen(false)}>Become a Member</Link>
                 </div>
               </div>
             </motion.div>

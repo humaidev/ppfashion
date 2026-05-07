@@ -175,8 +175,8 @@ export default function AdminDashboard() {
         activeTab === 'designers' ? '/api/admin/designers' :
           activeTab === 'kyc' ? '/api/admin/kyc' :
             activeTab === 'eventApps' ? '/api/admin/event-applications' :
-              activeTab === 'plans' ? '/api/admin/plans' : 
-                activeTab === 'payments' ? '/api/payment' : 
+              activeTab === 'plans' ? '/api/admin/plans' :
+                activeTab === 'payments' ? '/api/payment' :
                   activeTab === 'blogs' ? '/api/admin/blogs' : '/api/admin/events';
 
 
@@ -223,13 +223,13 @@ export default function AdminDashboard() {
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const endpoint = activeTab === 'designers' ? '/api/admin/designers' : 
-                     activeTab === 'events' ? '/api/admin/events' : 
-                     activeTab === 'blogs' ? '/api/admin/blogs' : '/api/admin/plans';
-    
-    const bodyData = activeTab === 'designers' ? 
-      (editMode ? { 
-        ...newDesigner, 
+    const endpoint = activeTab === 'designers' ? '/api/admin/designers' :
+      activeTab === 'events' ? '/api/admin/events' :
+        activeTab === 'blogs' ? '/api/admin/blogs' : '/api/admin/plans';
+
+    const bodyData = activeTab === 'designers' ?
+      (editMode ? {
+        ...newDesigner,
         id: editMode,
         experience: Number(newDesigner.experience) || 0,
         portfolioLinks: typeof newDesigner.links === 'string' ? newDesigner.links.split(',').map(l => l.trim()).filter(l => l) : (Array.isArray(newDesigner.links) ? newDesigner.links : []),
@@ -239,12 +239,12 @@ export default function AdminDashboard() {
         experience: Number(newDesigner.experience) || 0,
         portfolioLinks: typeof newDesigner.links === 'string' ? newDesigner.links.split(',').map(l => l.trim()).filter(l => l) : (Array.isArray(newDesigner.links) ? newDesigner.links : []),
         collections: typeof newDesigner.collections === 'string' ? newDesigner.collections.split(',').map(c => c.trim()).filter(c => c) : (Array.isArray(newDesigner.collections) ? newDesigner.collections : [])
-      }) : 
-      activeTab === 'events' ? 
-      (editMode ? { ...newEvent, id: editMode } : newEvent) :
-      activeTab === 'blogs' ?
-      (editMode ? { ...newBlog, id: editMode } : newBlog) :
-      (editMode ? { ...newPlan, id: editMode, features: typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : newPlan.features } : { ...newPlan, features: typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : newPlan.features });
+      }) :
+      activeTab === 'events' ?
+        (editMode ? { ...newEvent, id: editMode } : newEvent) :
+        activeTab === 'blogs' ?
+          (editMode ? { ...newBlog, id: editMode } : newBlog) :
+          (editMode ? { ...newPlan, id: editMode, features: typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : newPlan.features } : { ...newPlan, features: typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : newPlan.features });
 
 
     const method = editMode ? 'PUT' : 'POST';
@@ -274,12 +274,12 @@ export default function AdminDashboard() {
   const executeDelete = async () => {
     if (!showDeleteConfirm) return;
     const { id, type } = showDeleteConfirm;
-    const endpoint = type === 'designers' ? `/api/admin/designers?id=${id}` : 
-                     type === 'events' ? `/api/admin/events?id=${id}` :
-                     type === 'blogs' ? `/api/admin/blogs?id=${id}` :
-                     type === 'gallery' ? `/api/admin/gallery?id=${id}` :
-                     type === 'subscribers' ? `/api/admin/subscribers?id=${id}` :
-                     `/api/admin/plans?id=${id}`;
+    const endpoint = type === 'designers' ? `/api/admin/designers?id=${id}` :
+      type === 'events' ? `/api/admin/events?id=${id}` :
+        type === 'blogs' ? `/api/admin/blogs?id=${id}` :
+          type === 'gallery' ? `/api/admin/gallery?id=${id}` :
+            type === 'subscribers' ? `/api/admin/subscribers?id=${id}` :
+              `/api/admin/plans?id=${id}`;
 
 
     const t = toast.loading("De-registering...");
@@ -300,22 +300,22 @@ export default function AdminDashboard() {
   const openEdit = (item: any) => {
     setEditMode(item._id);
     if (activeTab === 'designers') {
-      setNewDesigner({ 
-        name: item.name || '', 
+      setNewDesigner({
+        name: item.name || '',
         email: item.email || '',
         password: '', // Always empty on edit start
         businessName: item.businessName || '',
-        specialty: item.specialty || '', 
+        specialty: item.specialty || '',
         experience: item.experience || item.kycData?.experience || '',
         cnic: item.cnic || item.kycData?.cnic || '',
         passport: item.passport || item.kycData?.passport || '',
-        location: item.location || item.kycData?.city || '', 
+        location: item.location || item.kycData?.city || '',
         address: item.address || item.kycData?.address || '',
-        tier: item.membership?.plan || item.tier || 'Basic', 
+        tier: item.membership?.plan || item.tier || 'Basic',
         image: item.image || item.portfolio?.brandLogo || '',
-        bio: item.bio || '', 
-        logo: item.logo || '', 
-        links: Array.isArray(item.links) ? item.links.join(', ') : (Array.isArray(item.portfolioLinks) ? item.portfolioLinks.join(', ') : (item.links || item.portfolioLinks || '')), 
+        bio: item.bio || '',
+        logo: item.logo || '',
+        links: Array.isArray(item.links) ? item.links.join(', ') : (Array.isArray(item.portfolioLinks) ? item.portfolioLinks.join(', ') : (item.links || item.portfolioLinks || '')),
         collections: Array.isArray(item.collections) ? item.collections.join(', ') : (item.collections || ''),
         documents: item.documents || { cnicFront: '', cnicBack: '', selfieWithCnic: '', license: '' }
       });
@@ -332,22 +332,22 @@ export default function AdminDashboard() {
   };
 
   const resetForms = () => {
-    setNewDesigner({ 
-      name: '', 
+    setNewDesigner({
+      name: '',
       email: '',
       password: '',
       businessName: '',
-      specialty: '', 
+      specialty: '',
       experience: '',
       cnic: '',
       passport: '',
-      location: '', 
+      location: '',
       address: '',
-      tier: 'Basic', 
-      image: '', 
-      bio: '', 
-      logo: '', 
-      links: '', 
+      tier: 'Basic',
+      image: '',
+      bio: '',
+      logo: '',
+      links: '',
       collections: '',
       documents: {
         cnicFront: '',
@@ -529,29 +529,29 @@ export default function AdminDashboard() {
             {(activeTab === 'events' || activeTab === 'plans' || activeTab === 'designers' || activeTab === 'blogs' || activeTab === 'membership') && (
               <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">
-                  {activeTab === 'events' ? 'Global Events Registry' : 
-                   activeTab === 'plans' ? 'Membership Plans Registry' : 
-                   activeTab === 'designers' ? 'Designer Collective Registry' : 
-                   activeTab === 'membership' ? 'Active Membership Registry' :
-                   'Journal & Blog Registry'}
+                  {activeTab === 'events' ? 'Global Events Registry' :
+                    activeTab === 'plans' ? 'Membership Plans Registry' :
+                      activeTab === 'designers' ? 'Designer Collective Registry' :
+                        activeTab === 'membership' ? 'Active Membership Registry' :
+                          'Journal & Blog Registry'}
                 </h4>
                 <button
-                  onClick={() => { 
+                  onClick={() => {
                     if (activeTab === 'membership') {
                       setActiveTab('plans');
                     } else {
-                      setEditMode(null); 
+                      setEditMode(null);
                       resetForms();
-                      setShowAddForm(true); 
+                      setShowAddForm(true);
                     }
                   }}
                   className="bg-primary-gold text-luxury-black px-6 py-3 text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_20px_rgba(232,209,150,0.2)]"
                 >
-                  {activeTab === 'events' ? 'Add New Event' : 
-                   activeTab === 'plans' ? 'Create New Plan' : 
-                   activeTab === 'designers' ? 'Add New Designer' : 
-                   activeTab === 'membership' ? 'Manage Membership Plans' :
-                   'Publish New Post'}
+                  {activeTab === 'events' ? 'Add New Event' :
+                    activeTab === 'plans' ? 'Create New Plan' :
+                      activeTab === 'designers' ? 'Add New Designer' :
+                        activeTab === 'membership' ? 'Manage Membership Plans' :
+                          'Publish New Post'}
                 </button>
               </div>
             )}
@@ -581,7 +581,7 @@ export default function AdminDashboard() {
                                 activeTab === 'eventApps' ? 'Designer / Event' :
                                   activeTab === 'plans' ? 'Plan Name / Interval' :
                                     activeTab === 'payments' ? 'Designer / User' :
-                                      activeTab === 'designers' ? 'Designer / Location' : 
+                                      activeTab === 'designers' ? 'Designer / Location' :
                                         activeTab === 'blogs' ? 'Post Title / Author' : 'Event / Type'}
                         </th>
                         <th className="py-8 px-10 text-[9px] font-black uppercase tracking-widest text-white/40">
@@ -591,16 +591,16 @@ export default function AdminDashboard() {
                                 activeTab === 'eventApps' ? 'Schedule / Contact' :
                                   activeTab === 'plans' ? 'Pricing / Description' :
                                     activeTab === 'payments' ? 'Transaction / ID' :
-                                      activeTab === 'designers' ? 'Specialty / Tier' : 
+                                      activeTab === 'designers' ? 'Specialty / Tier' :
                                         activeTab === 'blogs' ? 'Date / Excerpt' : 'Date / Venue'}
                         </th>
                         <th className="py-8 px-10 text-[9px] font-black uppercase tracking-widest text-white/40">
                           {activeTab === 'newsletter' ? 'Tier Status' :
-                            activeTab === 'events' ? 'Event Status' : 
-                             activeTab === 'plans' ? 'Visibility' : 
-                               activeTab === 'payments' ? 'Amount / Method' : 
-                                 activeTab === 'designers' ? 'Account Profile' : 
-                                   activeTab === 'blogs' ? 'Status' : 'Approval Status'}
+                            activeTab === 'events' ? 'Event Status' :
+                              activeTab === 'plans' ? 'Visibility' :
+                                activeTab === 'payments' ? 'Amount / Method' :
+                                  activeTab === 'designers' ? 'Account Profile' :
+                                    activeTab === 'blogs' ? 'Status' : 'Approval Status'}
                         </th>
                         <th className="py-8 px-10 text-right text-[9px] font-black uppercase tracking-widest text-white/40">Management</th>
                       </tr>
@@ -636,11 +636,10 @@ export default function AdminDashboard() {
                             <p className="text-xs text-white/60 font-medium italic">{app.email}</p>
                           </td>
                           <td className="py-10 px-10">
-                            <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${
-                              app.kycStatus === 'APPROVED' ? 'bg-secondary-emerald/20 text-secondary-emerald border-secondary-emerald/20' :
-                              app.kycStatus === 'REJECTED' ? 'bg-red-500/20 text-red-500 border-red-500/20' :
-                              'bg-primary-gold/10 text-primary-gold border-primary-gold/20'
-                            }`}>{app.kycStatus}</span>
+                            <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${app.kycStatus === 'APPROVED' ? 'bg-secondary-emerald/20 text-secondary-emerald border-secondary-emerald/20' :
+                                app.kycStatus === 'REJECTED' ? 'bg-red-500/20 text-red-500 border-red-500/20' :
+                                  'bg-primary-gold/10 text-primary-gold border-primary-gold/20'
+                              }`}>{app.kycStatus}</span>
                           </td>
                           <td className="py-10 px-10 text-right">
                             <div className="flex justify-end gap-2 transition-opacity">
@@ -650,7 +649,7 @@ export default function AdminDashboard() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                               </button>
-                              
+
                               {app.kycStatus === 'PENDING' && (
                                 <>
                                   <button onClick={() => updateKYC(app._id, 'APPROVED')} className="p-3 bg-secondary-emerald/20 text-secondary-emerald hover:bg-secondary-emerald hover:text-white transition-all" title="Approve">
@@ -682,11 +681,10 @@ export default function AdminDashboard() {
                             <p className="text-[9px] font-bold uppercase text-white/20">{app.event?.date}</p>
                           </td>
                           <td className="py-10 px-10">
-                            <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${
-                              app.status === 'APPROVED' ? 'bg-secondary-emerald/20 text-secondary-emerald border-secondary-emerald/20' :
-                              app.status === 'REJECTED' ? 'bg-red-500/20 text-red-500 border-red-500/20' :
-                              'bg-white/10 text-white/40 border-white/5'
-                            }`}>{app.status}</span>
+                            <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${app.status === 'APPROVED' ? 'bg-secondary-emerald/20 text-secondary-emerald border-secondary-emerald/20' :
+                                app.status === 'REJECTED' ? 'bg-red-500/20 text-red-500 border-red-500/20' :
+                                  'bg-white/10 text-white/40 border-white/5'
+                              }`}>{app.status}</span>
                           </td>
                           <td className="py-10 px-10 text-right">
                             <div className="flex justify-end gap-2 transition-opacity">
@@ -758,7 +756,7 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="py-10 px-10 text-right">
-                             <span className="text-[9px] font-black uppercase tracking-[0.3em] text-secondary-emerald bg-secondary-emerald/10 px-4 py-2 rounded-full border border-secondary-emerald/20">Success</span>
+                            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-secondary-emerald bg-secondary-emerald/10 px-4 py-2 rounded-full border border-secondary-emerald/20">Success</span>
                           </td>
                         </tr>
                       ))}
@@ -783,7 +781,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-10 px-10 text-right">
                             <div className="flex justify-end gap-2 transition-opacity">
-                               <button onClick={() => handleRenew(des._id)} className="p-3 bg-secondary-emerald/10 border border-secondary-emerald/20 text-secondary-emerald hover:bg-secondary-emerald hover:text-white transition-all" title="Renew Membership">
+                              <button onClick={() => handleRenew(des._id)} className="p-3 bg-secondary-emerald/10 border border-secondary-emerald/20 text-secondary-emerald hover:bg-secondary-emerald hover:text-white transition-all" title="Renew Membership">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                               </button>
                               <button onClick={() => openEdit(des)} className="p-3 bg-white/5 border border-white/10 text-white hover:border-primary-gold hover:text-primary-gold transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
@@ -896,7 +894,7 @@ export default function AdminDashboard() {
             >
               <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                 <h3 className="text-2xl font-serif font-bold italic gold-gradient-text">
-                   {editMode ? 'Modify' : 'Initialize'} {activeTab === 'events' ? 'Event' : activeTab === 'designers' ? 'Designer' : activeTab === 'blogs' ? 'Journal Post' : 'Membership Plan'}
+                  {editMode ? 'Modify' : 'Initialize'} {activeTab === 'events' ? 'Event' : activeTab === 'designers' ? 'Designer' : activeTab === 'blogs' ? 'Journal Post' : 'Membership Plan'}
                 </h3>
                 <button onClick={() => { setShowAddForm(false); setEditMode(null); }} className="text-white/40 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -906,139 +904,139 @@ export default function AdminDashboard() {
               <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
                 <form id="admin-form" onSubmit={handleAddSubmit} className="space-y-12">
 
-                {activeTab === 'designers' ? (
-                  <div className="space-y-12">
-                    {/* Identity Section */}
-                    <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 1: Identity & Legal</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="col-span-2">
-                           <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Designer Full Name</label>
-                           <input type="text" placeholder="e.g. Faraz Manan" required className="admin-input w-full" value={newDesigner.name} onChange={(e) => setNewDesigner({ ...newDesigner, name: e.target.value })} />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Email Address (For Login)</label>
-                          <input type="email" placeholder="designer@example.com" required className="admin-input" value={newDesigner.email || ''} onChange={(e) => setNewDesigner({ ...newDesigner, email: e.target.value })} />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Account Password</label>
-                          <input type="text" placeholder="Set a secure password" required className="admin-input" value={newDesigner.password || ''} onChange={(e) => setNewDesigner({ ...newDesigner, password: e.target.value })} />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">CNIC / ID Number</label>
-                          <input type="text" placeholder="42101-0000000-1" className="admin-input" value={newDesigner.cnic || ''} onChange={(e) => setNewDesigner({ ...newDesigner, cnic: e.target.value })} />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Passport Number (Optional)</label>
-                          <input type="text" placeholder="AB1234567" className="admin-input" value={newDesigner.passport || ''} onChange={(e) => setNewDesigner({ ...newDesigner, passport: e.target.value })} />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Business Section */}
-                    <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 2: Brand Profile</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Business / Brand Name</label>
-                          <input type="text" placeholder="e.g. Faraz Manan Couture" required className="admin-input" value={newDesigner.businessName || ''} onChange={(e) => setNewDesigner({ ...newDesigner, businessName: e.target.value })} />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Category</label>
-                          <select className="admin-input bg-luxury-black" value={newDesigner.specialty} onChange={(e) => setNewDesigner({ ...newDesigner, specialty: e.target.value })}>
-                            <option value="">Select Category</option>
-                            <option value="Bridal">Bridal Couture</option>
-                            <option value="Pret">Luxury Pret</option>
-                            <option value="Formal">Men's Formal</option>
-                            <option value="Jewelry">Luxury Jewelry</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Experience (Years)</label>
-                          <input type="number" placeholder="10" required className="admin-input" value={newDesigner.experience || ''} onChange={(e) => setNewDesigner({ ...newDesigner, experience: e.target.value })} />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">City</label>
-                          <input type="text" placeholder="Lahore / Dubai" required className="admin-input" value={newDesigner.location} onChange={(e) => setNewDesigner({ ...newDesigner, location: e.target.value })} />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Complete Physical Address</label>
-                          <textarea placeholder="Full business address..." className="admin-input min-h-[80px]" value={newDesigner.address || ''} onChange={(e) => setNewDesigner({ ...newDesigner, address: e.target.value })} />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Portfolio / Social Links (Comma separated)</label>
-                          <input type="text" placeholder="Instagram URL, Website..." className="admin-input w-full" value={newDesigner.links} onChange={(e) => setNewDesigner({ ...newDesigner, links: e.target.value })} />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Brand Bio</label>
-                          <div className="quill-luxury-editor">
-                            <ReactQuill theme="snow" value={newDesigner.bio || ''} onChange={(content) => setNewDesigner({ ...newDesigner, bio: content })} />
+                  {activeTab === 'designers' ? (
+                    <div className="space-y-12">
+                      {/* Identity Section */}
+                      <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 1: Identity & Legal</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="col-span-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Designer Full Name</label>
+                            <input type="text" placeholder="e.g. Faraz Manan" required className="admin-input w-full" value={newDesigner.name} onChange={(e) => setNewDesigner({ ...newDesigner, name: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Email Address (For Login)</label>
+                            <input type="email" placeholder="designer@example.com" required className="admin-input" value={newDesigner.email || ''} onChange={(e) => setNewDesigner({ ...newDesigner, email: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Account Password</label>
+                            <input type="text" placeholder="Set a secure password" required className="admin-input" value={newDesigner.password || ''} onChange={(e) => setNewDesigner({ ...newDesigner, password: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">CNIC / ID Number</label>
+                            <input type="text" placeholder="42101-0000000-1" className="admin-input" value={newDesigner.cnic || ''} onChange={(e) => setNewDesigner({ ...newDesigner, cnic: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Passport Number (Optional)</label>
+                            <input type="text" placeholder="AB1234567" className="admin-input" value={newDesigner.passport || ''} onChange={(e) => setNewDesigner({ ...newDesigner, passport: e.target.value })} />
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Verification Documents */}
-                    <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 3: Dossier & Verification</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        {/* Profile Image */}
-                        <div className="col-span-2 p-6 bg-white/5 border border-white/10">
-                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Main Profile Visual</label>
-                          <div className="flex items-center gap-8">
-                            <div className="w-20 h-28 bg-black/40 border border-white/5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
-                              {newDesigner.image ? <img src={newDesigner.image} className="w-full h-full object-cover" /> : <p className="text-[8px] text-white/10 uppercase">Empty</p>}
+                      {/* Business Section */}
+                      <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 2: Brand Profile</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Business / Brand Name</label>
+                            <input type="text" placeholder="e.g. Faraz Manan Couture" required className="admin-input" value={newDesigner.businessName || ''} onChange={(e) => setNewDesigner({ ...newDesigner, businessName: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Category</label>
+                            <select className="admin-input bg-luxury-black" value={newDesigner.specialty} onChange={(e) => setNewDesigner({ ...newDesigner, specialty: e.target.value })}>
+                              <option value="">Select Category</option>
+                              <option value="Bridal">Bridal Couture</option>
+                              <option value="Pret">Luxury Pret</option>
+                              <option value="Formal">Men's Formal</option>
+                              <option value="Jewelry">Luxury Jewelry</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Experience (Years)</label>
+                            <input type="number" placeholder="10" required className="admin-input" value={newDesigner.experience || ''} onChange={(e) => setNewDesigner({ ...newDesigner, experience: e.target.value })} />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">City</label>
+                            <input type="text" placeholder="Lahore / Dubai" required className="admin-input" value={newDesigner.location} onChange={(e) => setNewDesigner({ ...newDesigner, location: e.target.value })} />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Complete Physical Address</label>
+                            <textarea placeholder="Full business address..." className="admin-input min-h-[80px]" value={newDesigner.address || ''} onChange={(e) => setNewDesigner({ ...newDesigner, address: e.target.value })} />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Portfolio / Social Links (Comma separated)</label>
+                            <input type="text" placeholder="Instagram URL, Website..." className="admin-input w-full" value={newDesigner.links} onChange={(e) => setNewDesigner({ ...newDesigner, links: e.target.value })} />
+                          </div>
+                          <div className="col-span-2">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Brand Bio</label>
+                            <div className="quill-luxury-editor">
+                              <ReactQuill theme="snow" value={newDesigner.bio || ''} onChange={(content) => setNewDesigner({ ...newDesigner, bio: content })} />
                             </div>
-                            <input type="file" accept="image/*" onChange={async (e) => {
-                               const file = e.target.files?.[0];
-                               if (file) {
-                                 const formData = new FormData();
-                                 formData.append('file', file);
-                                 const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                                 const data = await res.json();
-                                 if (data.success) setNewDesigner({ ...newDesigner, image: data.url });
-                               }
-                            }} className="text-[10px] text-white/40 file:bg-primary-gold file:border-none file:text-luxury-black file:px-6 file:py-3 file:font-black file:uppercase file:tracking-widest cursor-pointer" />
                           </div>
                         </div>
+                      </div>
 
-                        {/* KYC Docs */}
-                        {[
-                          { label: "ID Front", key: "cnicFront" },
-                          { label: "ID Back", key: "cnicBack" },
-                          { label: "Selfie with ID", key: "selfieWithCnic" }
-                        ].map(doc => (
-                          <div key={doc.key} className="space-y-4">
-                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">{doc.label}</label>
-                            <div className="flex items-center gap-4">
-                              <div className="w-16 h-10 bg-black/40 border border-white/5 overflow-hidden flex items-center justify-center shadow-xl">
-                                {(newDesigner as any).documents?.[doc.key] ? <img src={(newDesigner as any).documents[doc.key]} className="w-full h-full object-cover" /> : <div className="w-2 h-2 bg-white/5 rounded-full" />}
+                      {/* Verification Documents */}
+                      <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 3: Dossier & Verification</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                          {/* Profile Image */}
+                          <div className="col-span-2 p-6 bg-white/5 border border-white/10">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Main Profile Visual</label>
+                            <div className="flex items-center gap-8">
+                              <div className="w-20 h-28 bg-black/40 border border-white/5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
+                                {newDesigner.image ? <img src={newDesigner.image} className="w-full h-full object-cover" /> : <p className="text-[8px] text-white/10 uppercase">Empty</p>}
                               </div>
                               <input type="file" accept="image/*" onChange={async (e) => {
-                                 const file = e.target.files?.[0];
-                                 if (file) {
-                                   const formData = new FormData();
-                                   formData.append('file', file);
-                                   const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                                   const data = await res.json();
-                                   if (data.success) {
-                                     setNewDesigner({ 
-                                       ...newDesigner, 
-                                       documents: { ...(newDesigner as any).documents, [doc.key]: data.url } 
-                                     } as any);
-                                   }
-                                 }
-                              }} className="text-[8px] text-white/20 file:bg-white/5 file:border-none file:text-white/40 file:px-3 file:py-1.5 file:uppercase file:tracking-widest cursor-pointer" />
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const formData = new FormData();
+                                  formData.append('file', file);
+                                  const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                                  const data = await res.json();
+                                  if (data.success) setNewDesigner({ ...newDesigner, image: data.url });
+                                }
+                              }} className="text-[10px] text-white/40 file:bg-primary-gold file:border-none file:text-luxury-black file:px-6 file:py-3 file:font-black file:uppercase file:tracking-widest cursor-pointer" />
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
 
-                    {/* Membership Tier */}
-                    <div className="bg-white/[0.02] p-8 border border-white/5">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Membership Access Level</label>
-                       <select className="admin-input bg-luxury-black w-full" value={newDesigner.tier} onChange={(e) => setNewDesigner({ ...newDesigner, tier: e.target.value as any })}>
+                          {/* KYC Docs */}
+                          {[
+                            { label: "ID Front", key: "cnicFront" },
+                            { label: "ID Back", key: "cnicBack" },
+                            { label: "Selfie with ID", key: "selfieWithCnic" }
+                          ].map(doc => (
+                            <div key={doc.key} className="space-y-4">
+                              <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">{doc.label}</label>
+                              <div className="flex items-center gap-4">
+                                <div className="w-16 h-10 bg-black/40 border border-white/5 overflow-hidden flex items-center justify-center shadow-xl">
+                                  {(newDesigner as any).documents?.[doc.key] ? <img src={(newDesigner as any).documents[doc.key]} className="w-full h-full object-cover" /> : <div className="w-2 h-2 bg-white/5 rounded-full" />}
+                                </div>
+                                <input type="file" accept="image/*" onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const formData = new FormData();
+                                    formData.append('file', file);
+                                    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                                    const data = await res.json();
+                                    if (data.success) {
+                                      setNewDesigner({
+                                        ...newDesigner,
+                                        documents: { ...(newDesigner as any).documents, [doc.key]: data.url }
+                                      } as any);
+                                    }
+                                  }
+                                }} className="text-[8px] text-white/20 file:bg-white/5 file:border-none file:text-white/40 file:px-3 file:py-1.5 file:uppercase file:tracking-widest cursor-pointer" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Membership Tier */}
+                      <div className="bg-white/[0.02] p-8 border border-white/5">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Membership Access Level</label>
+                        <select className="admin-input bg-luxury-black w-full" value={newDesigner.tier} onChange={(e) => setNewDesigner({ ...newDesigner, tier: e.target.value as any })}>
                           <option value="">Select Created Plan</option>
                           {Array.isArray(plans) && plans.map((plan) => (
                             <option key={plan?._id || plan?.name} value={plan?.name || ''}>
@@ -1046,165 +1044,165 @@ export default function AdminDashboard() {
                             </option>
                           ))}
                           {(!plans || plans.length === 0) && <option disabled>No plans created yet</option>}
-                       </select>
-                    </div>
-                  </div>
-                ) : activeTab === 'events' ? (
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <input type="text" placeholder="Event Title (e.g. Couture Week 2026)" required className="admin-input col-span-2" value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} />
-                    <input type="text" placeholder="Event Type (e.g. Fashion Show, Exhibition)" required className="admin-input" value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
-                    <input type="text" placeholder="Entry Price (e.g. From £50)" required className="admin-input" value={newEvent.price} onChange={(e) => setNewEvent({ ...newEvent, price: e.target.value })} />
-
-                    <div className="space-y-2">
-                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Commencement Date</label>
-                      <input type="date" required className="admin-input" value={newEvent.startDate} onChange={(e) => setNewEvent({ ...newEvent, startDate: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Conclusion Date</label>
-                      <input type="date" required className="admin-input" value={newEvent.endDate} onChange={(e) => setNewEvent({ ...newEvent, endDate: e.target.value })} />
-                    </div>
-
-                    <input type="text" placeholder="Venue Location (e.g. Royal Albert Hall, London)" required className="admin-input" value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })} />
-                    <input type="text" placeholder="Status (e.g. Applications Open)" required className="admin-input" value={newEvent.status} onChange={(e) => setNewEvent({ ...newEvent, status: e.target.value })} />
-
-                    <div className="col-span-2 space-y-4 pt-4">
-                      <label className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Featured Event Banner</label>
-                      <div className="flex items-center gap-6">
-                        <div className="w-32 h-20 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex items-center justify-center">
-                          {newEvent.image ? <img src={newEvent.image} className="w-full h-full object-cover" /> : <svg className="w-8 h-8 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
-                        </div>
-                        <input type="file" accept="image/*" onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => setNewEvent({ ...newEvent, image: reader.result as string });
-                            reader.readAsDataURL(file);
-                          }
-                        }} className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer" />
+                        </select>
                       </div>
                     </div>
-                  </div>
-                ) : activeTab === 'blogs' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <input type="text" placeholder="Post Title" required className="admin-input col-span-2" value={newBlog.title} onChange={(e) => setNewBlog({ ...newBlog, title: e.target.value })} />
-                    <input type="text" placeholder="Author Name" required className="admin-input" value={newBlog.author} onChange={(e) => setNewBlog({ ...newBlog, author: e.target.value })} />
-                    <input type="text" placeholder="Short Excerpt" required className="admin-input" value={newBlog.excerpt} onChange={(e) => setNewBlog({ ...newBlog, excerpt: e.target.value })} />
-                    
-                    <div className="col-span-2 space-y-2">
-                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Post Content (HTML allowed)</label>
-                      <textarea 
-                       placeholder="Write your article here..." 
-                       required
-                       className="w-full bg-transparent border border-white/10 p-4 text-white focus:outline-none focus:border-primary-gold transition-all text-sm min-h-[200px]"
-                       value={newBlog.content}
-                       onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
-                      />
-                    </div>
+                  ) : activeTab === 'events' ? (
 
-                    <div className="col-span-2 space-y-4">
-                      <label className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Featured Cover Image</label>
-                      <div className="flex items-center gap-6">
-                        <div className="w-32 h-20 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex items-center justify-center">
-                          {newBlog.image ? <img src={newBlog.image} className="w-full h-full object-cover" /> : <svg className="w-8 h-8 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <input type="text" placeholder="Event Title (e.g. Couture Week 2026)" required className="admin-input col-span-2" value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} />
+                      <input type="text" placeholder="Event Type (e.g. Fashion Show, Exhibition)" required className="admin-input" value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
+                      <input type="text" placeholder="Entry Price (e.g. From £50)" required className="admin-input" value={newEvent.price} onChange={(e) => setNewEvent({ ...newEvent, price: e.target.value })} />
+
+                      <div className="space-y-2">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Commencement Date</label>
+                        <input type="date" required className="admin-input" value={newEvent.startDate} onChange={(e) => setNewEvent({ ...newEvent, startDate: e.target.value })} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Conclusion Date</label>
+                        <input type="date" required className="admin-input" value={newEvent.endDate} onChange={(e) => setNewEvent({ ...newEvent, endDate: e.target.value })} />
+                      </div>
+
+                      <input type="text" placeholder="Venue Location (e.g. Royal Albert Hall, London)" required className="admin-input" value={newEvent.location} onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })} />
+                      <input type="text" placeholder="Status (e.g. Applications Open)" required className="admin-input" value={newEvent.status} onChange={(e) => setNewEvent({ ...newEvent, status: e.target.value })} />
+
+                      <div className="col-span-2 space-y-4 pt-4">
+                        <label className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Featured Event Banner</label>
+                        <div className="flex items-center gap-6">
+                          <div className="w-32 h-20 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex items-center justify-center">
+                            {newEvent.image ? <img src={newEvent.image} className="w-full h-full object-cover" /> : <svg className="w-8 h-8 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+                          </div>
+                          <input type="file" accept="image/*" onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setNewEvent({ ...newEvent, image: reader.result as string });
+                              reader.readAsDataURL(file);
+                            }
+                          }} className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer" />
                         </div>
-                        <input type="file" accept="image/*" onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => setNewBlog({ ...newBlog, image: reader.result as string });
-                            reader.readAsDataURL(file);
-                          }
-                        }} className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer" />
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div className="col-span-2">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">Plan Designation</label>
-                       <input type="text" placeholder="e.g. Elite Collective" required className="admin-input" value={newPlan.name} onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })} />
+                  ) : activeTab === 'blogs' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <input type="text" placeholder="Post Title" required className="admin-input col-span-2" value={newBlog.title} onChange={(e) => setNewBlog({ ...newBlog, title: e.target.value })} />
+                      <input type="text" placeholder="Author Name" required className="admin-input" value={newBlog.author} onChange={(e) => setNewBlog({ ...newBlog, author: e.target.value })} />
+                      <input type="text" placeholder="Short Excerpt" required className="admin-input" value={newBlog.excerpt} onChange={(e) => setNewBlog({ ...newBlog, excerpt: e.target.value })} />
+
+                      <div className="col-span-2 space-y-2">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Post Content (HTML allowed)</label>
+                        <textarea
+                          placeholder="Write your article here..."
+                          required
+                          className="w-full bg-transparent border border-white/10 p-4 text-white focus:outline-none focus:border-primary-gold transition-all text-sm min-h-[200px]"
+                          value={newBlog.content}
+                          onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="col-span-2 space-y-4">
+                        <label className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Featured Cover Image</label>
+                        <div className="flex items-center gap-6">
+                          <div className="w-32 h-20 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex items-center justify-center">
+                            {newBlog.image ? <img src={newBlog.image} className="w-full h-full object-cover" /> : <svg className="w-8 h-8 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
+                          </div>
+                          <input type="file" accept="image/*" onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setNewBlog({ ...newBlog, image: reader.result as string });
+                              reader.readAsDataURL(file);
+                            }
+                          }} className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer" />
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="space-y-4">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Financial Configuration</label>
-                       <div className="flex gap-4">
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                      <div className="col-span-2">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">Plan Designation</label>
+                        <input type="text" placeholder="e.g. Elite Collective" required className="admin-input" value={newPlan.name} onChange={(e) => setNewPlan({ ...newPlan, name: e.target.value })} />
+                      </div>
+
+                      <div className="space-y-4">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Financial Configuration</label>
+                        <div className="flex gap-4">
                           <div className="w-28 relative">
-                             <span className="absolute -top-3 left-0 text-[7px] uppercase text-primary-gold/60 font-bold">Currency</span>
-                             <select className="admin-input bg-luxury-black" value={newPlan.currency} onChange={(e) => setNewPlan({ ...newPlan, currency: e.target.value })}>
-                               <option value="£">£ (GBP)</option>
-                               <option value="$">$ (USD)</option>
-                               <option value="€">€ (EUR)</option>
-                               <option value="PKR">PKR</option>
-                             </select>
+                            <span className="absolute -top-3 left-0 text-[7px] uppercase text-primary-gold/60 font-bold">Currency</span>
+                            <select className="admin-input bg-luxury-black" value={newPlan.currency} onChange={(e) => setNewPlan({ ...newPlan, currency: e.target.value })}>
+                              <option value="£">£ (GBP)</option>
+                              <option value="$">$ (USD)</option>
+                              <option value="€">€ (EUR)</option>
+                              <option value="PKR">PKR</option>
+                            </select>
                           </div>
                           <div className="flex-1 relative">
-                             <span className="absolute -top-3 left-0 text-[7px] uppercase text-primary-gold/60 font-bold">Rate / Price</span>
-                             <input type="number" placeholder="0.00" required className="admin-input" value={newPlan.price} onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })} />
+                            <span className="absolute -top-3 left-0 text-[7px] uppercase text-primary-gold/60 font-bold">Rate / Price</span>
+                            <input type="number" placeholder="0.00" required className="admin-input" value={newPlan.price} onChange={(e) => setNewPlan({ ...newPlan, price: e.target.value })} />
                           </div>
-                       </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Billing Cycle</label>
-                       <div className="relative">
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Billing Cycle</label>
+                        <div className="relative">
                           <span className="absolute -top-3 left-0 text-[7px] uppercase text-primary-gold/60 font-bold">Frequency</span>
                           <select className="admin-input bg-luxury-black" value={newPlan.interval} onChange={(e) => setNewPlan({ ...newPlan, interval: e.target.value as any })}>
                             <option value="monthly">Monthly Recurring</option>
                             <option value="yearly">Annual Commitment</option>
                           </select>
-                       </div>
-                    </div>
-
-                    <div className="col-span-2">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">Value Proposition / Description</label>
-                       <input type="text" placeholder="Short description of the plan's primary value..." required className="admin-input" value={newPlan.description} onChange={(e) => setNewPlan({ ...newPlan, description: e.target.value })} />
-                    </div>
-                    
-                    <div className="col-span-2 space-y-4">
-                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Exclusive Features (Comma separated)</label>
-                      <textarea 
-                       placeholder="e.g. VIP Access, Portfolio Review, Global Showcase..." 
-                       className="w-full bg-transparent border-b border-white/10 py-4 text-white focus:outline-none focus:border-primary-gold transition-all text-sm min-h-[80px]"
-                       value={newPlan.features}
-                       onChange={(e) => setNewPlan({ ...newPlan, features: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="col-span-2">
-                      <label className="flex items-center gap-6 cursor-pointer p-4 bg-white/[0.02] border border-white/5 hover:border-primary-gold/30 transition-all group">
-                        <input type="checkbox" checked={newPlan.isPopular} onChange={(e) => setNewPlan({ ...newPlan, isPopular: e.target.checked })} className="w-5 h-5 accent-primary-gold" />
-                        <div>
-                          <p className="text-[10px] uppercase tracking-widest text-white font-bold mb-1">Highlight as Featured</p>
-                          <p className="text-[8px] uppercase tracking-widest text-white/20">Mark as the 'Most Popular' choice for designers</p>
                         </div>
-                      </label>
-                    </div>
-                  </div>
-                )}
+                      </div>
 
-                <button type="submit" className="w-full brand-gradient py-6 text-[10px] font-black uppercase tracking-[0.4em] shadow-3xl hover:scale-[1.02] transition-all">
-                  {editMode ? 'Save Modifications' : 'Commit Record to Registry'}
-                </button>
-              </form>
-            </div>
-          </motion.div>
+                      <div className="col-span-2">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">Value Proposition / Description</label>
+                        <input type="text" placeholder="Short description of the plan's primary value..." required className="admin-input" value={newPlan.description} onChange={(e) => setNewPlan({ ...newPlan, description: e.target.value })} />
+                      </div>
+
+                      <div className="col-span-2 space-y-4">
+                        <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Exclusive Features (Comma separated)</label>
+                        <textarea
+                          placeholder="e.g. VIP Access, Portfolio Review, Global Showcase..."
+                          className="w-full bg-transparent border-b border-white/10 py-4 text-white focus:outline-none focus:border-primary-gold transition-all text-sm min-h-[80px]"
+                          value={newPlan.features}
+                          onChange={(e) => setNewPlan({ ...newPlan, features: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="col-span-2">
+                        <label className="flex items-center gap-6 cursor-pointer p-4 bg-white/[0.02] border border-white/5 hover:border-primary-gold/30 transition-all group">
+                          <input type="checkbox" checked={newPlan.isPopular} onChange={(e) => setNewPlan({ ...newPlan, isPopular: e.target.checked })} className="w-5 h-5 accent-primary-gold" />
+                          <div>
+                            <p className="text-[10px] uppercase tracking-widest text-white font-bold mb-1">Highlight as Featured</p>
+                            <p className="text-[8px] uppercase tracking-widest text-white/20">Mark as the 'Most Popular' choice for designers</p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  <button type="submit" className="w-full brand-gradient py-6 text-[10px] font-black uppercase tracking-[0.4em] shadow-3xl hover:scale-[1.02] transition-all">
+                    {editMode ? 'Save Modifications' : 'Commit Record to Registry'}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
 
           </motion.div>
         )}
       </AnimatePresence>
 
-      <KYCDetailModal 
-        selectedKYC={selectedKYC} 
-        setSelectedKYC={setSelectedKYC} 
-        updateKYC={updateKYC} 
-        setFullScreenImage={setFullScreenImage} 
+      <KYCDetailModal
+        selectedKYC={selectedKYC}
+        setSelectedKYC={setSelectedKYC}
+        updateKYC={updateKYC}
+        setFullScreenImage={setFullScreenImage}
       />
 
-      <EventAppDetailModal 
-        selectedApp={selectedEventApp} 
-        setSelectedApp={setSelectedEventApp} 
-        updateApp={updateEventApp} 
+      <EventAppDetailModal
+        selectedApp={selectedEventApp}
+        setSelectedApp={setSelectedEventApp}
+        updateApp={updateEventApp}
       />
 
       {/* Full Screen Image Overlay */}
