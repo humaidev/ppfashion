@@ -129,6 +129,7 @@ export default function AdminDashboard() {
       if (!data.isLoggedIn || data.role !== 'ADMIN') {
         router.push("/login");
       } else {
+        fetchStats();
         fetchData();
         // Always fetch plans once to ensure they are available for forms
         fetch('/api/admin/plans')
@@ -138,6 +139,34 @@ export default function AdminDashboard() {
     };
     checkAdmin();
   }, [activeTab]);
+
+  const fetchStats = async () => {
+    try {
+      const [kycRes, eventAppRes, designerRes, subRes, payRes] = await Promise.all([
+        fetch('/api/admin/kyc'),
+        fetch('/api/admin/event-applications'),
+        fetch('/api/admin/designers'),
+        fetch('/api/admin/subscribers'),
+        fetch('/api/payment')
+      ]);
+
+      const [kycData, eventAppData, designerData, subData, payData] = await Promise.all([
+        kycRes.json(),
+        eventAppRes.json(),
+        designerRes.json(),
+        subRes.json(),
+        payRes.json()
+      ]);
+
+      if (kycData.success) setKycApps(kycData.applications || []);
+      if (eventAppData.success) setEventApps(eventAppData.applications || []);
+      if (designerData.success) setDesigners(designerData.designers || []);
+      if (subData.success) setSubscribers(subData.subscribers || []);
+      if (payData.success) setPayments(payData.transactions || []);
+    } catch (err) {
+      console.error("Stats fetch failed", err);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -168,7 +197,6 @@ export default function AdminDashboard() {
         if (activeTab === 'kyc') setKycApps(data.applications || []);
         if (activeTab === 'eventApps') setEventApps(data.applications || []);
         if (activeTab === 'plans') setPlans(data.plans || []);
-        if (activeTab === 'payments') setPayments(data.transactions || []);
       }
 
     } catch (err) {
@@ -428,7 +456,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10 lg:mb-16">
           {[
             { label: 'Pending KYC', val: kycApps.length, color: 'text-primary-gold' },
-            { id: 'revenue', label: 'Global Revenue', val: `£${payments.reduce((acc, curr) => acc + (parseFloat(curr.amount?.replace(/\D/g, '') || '0')), 0)}`, color: 'text-secondary-emerald' },
+            { id: 'revenue', label: 'Global Revenue', val: `£${payments.reduce((acc, curr) => acc + (parseFloat(curr.amount?.toString().replace(/[^\d.]/g, '') || '0')), 0).toLocaleString()}`, color: 'text-secondary-emerald' },
             { label: 'Applications', val: eventApps.length, color: 'text-white' },
             { label: 'Active Members', val: designers.length + subscribers.length, color: 'text-white/40' },
           ].map((stat, i) => (
