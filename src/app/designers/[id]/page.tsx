@@ -116,7 +116,7 @@ export default async function DesignerDetailPage({ params }: { params: Promise<{
               </div>
               <div className="border-l-2 border-primary-gold pl-4">
                 <p className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[10px] mb-2">Experience</p>
-                <p className="text-white text-xl font-serif italic">{designer.kycData?.experience || '5+'} Years</p>
+                <p className="text-white text-xl font-serif italic">{designer.experience || designer.kycData?.experience || '5+'} Years</p>
               </div>
             </div>
 

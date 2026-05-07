@@ -28,10 +28,24 @@ interface ISubscriber {
 interface IDesigner {
   _id: string;
   name: string;
+  email?: string;
+  businessName?: string;
   specialty: string;
+  experience?: number;
+  cnic?: string;
+  passport?: string;
   tier: string;
   location: string;
+  address?: string;
   image: string;
+  bio?: string;
+  portfolioLinks?: string[];
+  documents?: {
+    cnicFront?: string;
+    cnicBack?: string;
+    selfieWithCnic?: string;
+    license?: string;
+  };
 }
 
 interface IEvent {
@@ -56,13 +70,12 @@ interface IBlog {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'newsletter' | 'kyc' | 'eventApps' | 'membership' | 'designers' | 'payments' | 'events' | 'blogs' | 'gallery' | 'plans'>('newsletter');
+  const [activeTab, setActiveTab] = useState<'newsletter' | 'kyc' | 'eventApps' | 'membership' | 'designers' | 'payments' | 'events' | 'blogs' | 'plans'>('newsletter');
   const [editMode, setEditMode] = useState<string | null>(null);
   const [subscribers, setSubscribers] = useState<ISubscriber[]>([]);
   const [designers, setDesigners] = useState<IDesigner[]>([]);
   const [events, setEvents] = useState<IEvent[]>([]);
   const [blogs, setBlogs] = useState<IBlog[]>([]);
-  const [galleryItems, setGalleryItems] = useState<any[]>([]);
 
   const [kycApps, setKycApps] = useState<any[]>([]);
   const [eventApps, setEventApps] = useState<any[]>([]);
@@ -79,12 +92,34 @@ export default function AdminDashboard() {
   const [feedbackText, setFeedbackText] = useState("");
   const router = useRouter();
 
-  const [newDesigner, setNewDesigner] = useState({ name: '', specialty: '', tier: 'Premium' as any, location: '', image: '', bio: '', logo: '', links: '', collections: '' });
+  const [newDesigner, setNewDesigner] = useState({
+    name: '',
+    email: '',
+    password: '',
+    businessName: '',
+    specialty: '',
+    experience: '',
+    cnic: '',
+    passport: '',
+    location: '',
+    address: '',
+    tier: 'Basic' as 'Basic' | 'Premium' | 'Elite',
+    bio: '',
+    image: '',
+    logo: '',
+    links: '',
+    collections: '',
+    documents: {
+      cnicFront: '',
+      cnicBack: '',
+      selfieWithCnic: '',
+      license: ''
+    }
+  });
 
   const [newEvent, setNewEvent] = useState({ title: '', startDate: '', endDate: '', location: '', type: '', price: '', status: 'Applications Open', image: '' });
   const [newPlan, setNewPlan] = useState({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
   const [newBlog, setNewBlog] = useState({ title: '', excerpt: '', content: '', author: '', image: '' });
-  const [newGalleryItem, setNewGalleryItem] = useState({ imageUrl: '', title: '', category: '' });
 
 
   useEffect(() => {
@@ -95,6 +130,10 @@ export default function AdminDashboard() {
         router.push("/login");
       } else {
         fetchData();
+        // Always fetch plans once to ensure they are available for forms
+        fetch('/api/admin/plans')
+          .then(res => res.json())
+          .then(data => { if (data.success) setPlans(data.plans || []); });
       }
     };
     checkAdmin();
@@ -109,8 +148,7 @@ export default function AdminDashboard() {
             activeTab === 'eventApps' ? '/api/admin/event-applications' :
               activeTab === 'plans' ? '/api/admin/plans' : 
                 activeTab === 'payments' ? '/api/payment' : 
-                  activeTab === 'blogs' ? '/api/admin/blogs' : 
-                    activeTab === 'gallery' ? '/api/admin/gallery' : '/api/admin/events';
+                  activeTab === 'blogs' ? '/api/admin/blogs' : '/api/admin/events';
 
 
     try {
@@ -118,14 +156,19 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (data.success) {
         if (activeTab === 'newsletter' || activeTab === 'membership') setSubscribers(data.subscribers || []);
-        if (activeTab === 'designers') setDesigners(data.designers || []);
+        if (activeTab === 'designers') {
+          setDesigners(data.designers || []);
+          // Also fetch plans for the designer add form
+          const pRes = await fetch('/api/admin/plans');
+          const pData = await pRes.json();
+          if (pData.success) setPlans(pData.plans || []);
+        }
         if (activeTab === 'events') setEvents(data.events || []);
         if (activeTab === 'blogs') setBlogs(data.blogs || []);
         if (activeTab === 'kyc') setKycApps(data.applications || []);
         if (activeTab === 'eventApps') setEventApps(data.applications || []);
         if (activeTab === 'plans') setPlans(data.plans || []);
         if (activeTab === 'payments') setPayments(data.transactions || []);
-        if (activeTab === 'gallery') setGalleryItems(data.items || []);
       }
 
     } catch (err) {
@@ -154,26 +197,25 @@ export default function AdminDashboard() {
     e.preventDefault();
     const endpoint = activeTab === 'designers' ? '/api/admin/designers' : 
                      activeTab === 'events' ? '/api/admin/events' : 
-                     activeTab === 'blogs' ? '/api/admin/blogs' : 
-                     activeTab === 'gallery' ? '/api/admin/gallery' : '/api/admin/plans';
+                     activeTab === 'blogs' ? '/api/admin/blogs' : '/api/admin/plans';
     
     const bodyData = activeTab === 'designers' ? 
       (editMode ? { 
         ...newDesigner, 
         id: editMode,
-        links: typeof newDesigner.links === 'string' ? newDesigner.links.split(',').map(l => l.trim()) : newDesigner.links,
-        collections: typeof newDesigner.collections === 'string' ? newDesigner.collections.split(',').map(c => c.trim()) : newDesigner.collections
+        experience: Number(newDesigner.experience) || 0,
+        portfolioLinks: typeof newDesigner.links === 'string' ? newDesigner.links.split(',').map(l => l.trim()).filter(l => l) : (Array.isArray(newDesigner.links) ? newDesigner.links : []),
+        collections: typeof newDesigner.collections === 'string' ? newDesigner.collections.split(',').map(c => c.trim()).filter(c => c) : (Array.isArray(newDesigner.collections) ? newDesigner.collections : [])
       } : {
         ...newDesigner,
-        links: typeof newDesigner.links === 'string' ? newDesigner.links.split(',').map(l => l.trim()) : newDesigner.links,
-        collections: typeof newDesigner.collections === 'string' ? newDesigner.collections.split(',').map(c => c.trim()) : newDesigner.collections
+        experience: Number(newDesigner.experience) || 0,
+        portfolioLinks: typeof newDesigner.links === 'string' ? newDesigner.links.split(',').map(l => l.trim()).filter(l => l) : (Array.isArray(newDesigner.links) ? newDesigner.links : []),
+        collections: typeof newDesigner.collections === 'string' ? newDesigner.collections.split(',').map(c => c.trim()).filter(c => c) : (Array.isArray(newDesigner.collections) ? newDesigner.collections : [])
       }) : 
       activeTab === 'events' ? 
       (editMode ? { ...newEvent, id: editMode } : newEvent) :
       activeTab === 'blogs' ?
       (editMode ? { ...newBlog, id: editMode } : newBlog) :
-      activeTab === 'gallery' ?
-      (editMode ? { ...newGalleryItem, id: editMode } : newGalleryItem) :
       (editMode ? { ...newPlan, id: editMode, features: typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : newPlan.features } : { ...newPlan, features: typeof newPlan.features === 'string' ? newPlan.features.split(',').map(f => f.trim()) : newPlan.features });
 
 
@@ -231,23 +273,29 @@ export default function AdminDashboard() {
     setEditMode(item._id);
     if (activeTab === 'designers') {
       setNewDesigner({ 
-        name: item.name, 
-        specialty: item.specialty, 
-        tier: item.tier, 
-        location: item.location, 
-        image: item.image,
-        bio: item.bio || '',
-        logo: item.logo || '',
-        links: item.links?.join(', ') || '',
-        collections: item.collections?.join(', ') || ''
+        name: item.name || '', 
+        email: item.email || '',
+        password: '', // Always empty on edit start
+        businessName: item.businessName || '',
+        specialty: item.specialty || '', 
+        experience: item.experience || '',
+        cnic: item.cnic || '',
+        passport: item.passport || '',
+        location: item.location || '', 
+        address: item.address || '',
+        tier: item.tier || 'Basic', 
+        image: item.image || '',
+        bio: item.bio || '', 
+        logo: item.logo || '', 
+        links: Array.isArray(item.links) ? item.links.join(', ') : (Array.isArray(item.portfolioLinks) ? item.portfolioLinks.join(', ') : (item.links || item.portfolioLinks || '')), 
+        collections: Array.isArray(item.collections) ? item.collections.join(', ') : (item.collections || ''),
+        documents: item.documents || { cnicFront: '', cnicBack: '', selfieWithCnic: '', license: '' }
       });
     } else if (activeTab === 'events') {
 
       setNewEvent({ title: item.title, startDate: item.startDate, endDate: item.endDate, location: item.location, type: item.type, price: item.price, status: item.status, image: item.image });
     } else if (activeTab === 'blogs') {
       setNewBlog({ title: item.title, excerpt: item.excerpt, content: item.content, author: item.author, image: item.image });
-    } else if (activeTab === 'gallery') {
-      setNewGalleryItem({ imageUrl: item.imageUrl, title: item.title, category: item.category });
     } else {
 
       setNewPlan({ name: item.name, price: item.price, currency: item.currency || '£', interval: item.interval, description: item.description, features: item.features.join(', '), isPopular: item.isPopular });
@@ -256,11 +304,33 @@ export default function AdminDashboard() {
   };
 
   const resetForms = () => {
-    setNewDesigner({ name: '', specialty: '', tier: 'Premium', location: '', image: '', bio: '', logo: '', links: '', collections: '' });
+    setNewDesigner({ 
+      name: '', 
+      email: '',
+      password: '',
+      businessName: '',
+      specialty: '', 
+      experience: '',
+      cnic: '',
+      passport: '',
+      location: '', 
+      address: '',
+      tier: 'Basic', 
+      image: '', 
+      bio: '', 
+      logo: '', 
+      links: '', 
+      collections: '',
+      documents: {
+        cnicFront: '',
+        cnicBack: '',
+        selfieWithCnic: '',
+        license: ''
+      }
+    });
     setNewEvent({ title: '', startDate: '', endDate: '', location: '', type: '', price: '', status: 'Applications Open', image: '' });
     setNewPlan({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
     setNewBlog({ title: '', excerpt: '', content: '', author: '', image: '' });
-    setNewGalleryItem({ imageUrl: '', title: '', category: '' });
   };
 
   async function updateKYC(userId: string, status: string) {
@@ -388,7 +458,6 @@ export default function AdminDashboard() {
               { id: 'payments', label: 'Payments', icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z' },
               { id: 'events', label: 'Global Events', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z' },
               { id: 'blogs', label: 'Journal / Blog', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
-              { id: 'gallery', label: 'Image Gallery', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
               { id: 'plans', label: 'Membership Plans', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
             ].map((tab) => (
               <button
@@ -408,14 +477,13 @@ export default function AdminDashboard() {
           {/* Table Content */}
           <div className="flex-1 bg-white/[0.01] border border-white/5 min-h-[600px] overflow-hidden flex flex-col">
             {/* Contextual Action Bar */}
-            {(activeTab === 'events' || activeTab === 'plans' || activeTab === 'designers' || activeTab === 'blogs' || activeTab === 'membership' || activeTab === 'gallery') && (
+            {(activeTab === 'events' || activeTab === 'plans' || activeTab === 'designers' || activeTab === 'blogs' || activeTab === 'membership') && (
               <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">
                   {activeTab === 'events' ? 'Global Events Registry' : 
                    activeTab === 'plans' ? 'Membership Plans Registry' : 
                    activeTab === 'designers' ? 'Designer Collective Registry' : 
                    activeTab === 'membership' ? 'Active Membership Registry' :
-                   activeTab === 'gallery' ? 'Visual Arts Gallery' :
                    'Journal & Blog Registry'}
                 </h4>
                 <button
@@ -434,7 +502,6 @@ export default function AdminDashboard() {
                    activeTab === 'plans' ? 'Create New Plan' : 
                    activeTab === 'designers' ? 'Add New Designer' : 
                    activeTab === 'membership' ? 'Manage Membership Plans' :
-                   activeTab === 'gallery' ? 'Add Gallery Item' :
                    'Publish New Post'}
                 </button>
               </div>
@@ -720,33 +787,6 @@ export default function AdminDashboard() {
                         </tr>
                       ))}
 
-                      {/* Gallery Render */}
-                      {activeTab === 'gallery' && galleryItems.map((item) => (
-                        <tr key={item._id} className="group hover:bg-white/[0.02] transition-colors">
-                          <td className="py-10 px-10">
-                            <div className="flex items-center gap-6">
-                              <div className="w-24 h-16 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex-shrink-0">
-                                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold text-white mb-1">{item.title}</p>
-                                <p className="text-[10px] uppercase tracking-widest text-primary-gold/60 font-bold italic">{item.category}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-10 px-10">
-                            <p className="text-[10px] text-white/40 truncate max-w-[200px] uppercase tracking-widest">{item.imageUrl}</p>
-                          </td>
-                          <td className="py-10 px-10 text-right">
-                            <div className="flex justify-end gap-2">
-                              <button onClick={() => openEdit(item)} className="p-3 bg-white/5 border border-white/10 text-white hover:border-primary-gold hover:text-primary-gold transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                              <button onClick={() => setShowDeleteConfirm({ id: item._id, type: 'gallery' })} className="p-3 bg-white/5 border border-white/10 text-white hover:bg-red-500 hover:text-white transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-
-
                       {/* Fallback for Empty */}
                       {((activeTab === 'newsletter' && subscribers.length === 0) ||
                         (activeTab === 'membership' && subscribers.length === 0) ||
@@ -755,7 +795,6 @@ export default function AdminDashboard() {
                         (activeTab === 'designers' && designers.length === 0) ||
                         (activeTab === 'events' && events.length === 0) ||
                         (activeTab === 'blogs' && blogs.length === 0) ||
-                        (activeTab === 'gallery' && galleryItems.length === 0) ||
                         (activeTab === 'plans' && plans.length === 0)) && (
 
                           <tr>
@@ -805,7 +844,7 @@ export default function AdminDashboard() {
             >
               <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                 <h3 className="text-2xl font-serif font-bold italic gold-gradient-text">
-                   {editMode ? 'Modify' : 'Initialize'} {activeTab === 'events' ? 'Event' : activeTab === 'designers' ? 'Designer' : activeTab === 'blogs' ? 'Journal Post' : activeTab === 'gallery' ? 'Gallery Item' : 'Membership Plan'}
+                   {editMode ? 'Modify' : 'Initialize'} {activeTab === 'events' ? 'Event' : activeTab === 'designers' ? 'Designer' : activeTab === 'blogs' ? 'Journal Post' : 'Membership Plan'}
                 </h3>
                 <button onClick={() => { setShowAddForm(false); setEditMode(null); }} className="text-white/40 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -816,62 +855,146 @@ export default function AdminDashboard() {
                 <form id="admin-form" onSubmit={handleAddSubmit} className="space-y-12">
 
                 {activeTab === 'designers' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <input type="text" placeholder="Full Name (e.g. Faraz Manan)" required className="admin-input col-span-2" value={newDesigner.name} onChange={(e) => setNewDesigner({ ...newDesigner, name: e.target.value })} />
-                    <input type="text" placeholder="Specialty (e.g. Bespoke Couture)" required className="admin-input" value={newDesigner.specialty} onChange={(e) => setNewDesigner({ ...newDesigner, specialty: e.target.value })} />
-                    <input type="text" placeholder="Location (e.g. Dubai, UAE)" required className="admin-input" value={newDesigner.location} onChange={(e) => setNewDesigner({ ...newDesigner, location: e.target.value })} />
-                    <select className="admin-input bg-luxury-black" value={newDesigner.tier} onChange={(e) => setNewDesigner({ ...newDesigner, tier: e.target.value as any })}>
-                      <option value="Basic">Basic Member</option>
-                      <option value="Premium">Premium Member</option>
-                      <option value="Elite">Elite Member</option>
-                    </select>
-                    
-                    <div className="col-span-2">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Company Bio / History</label>
-                       <div className="quill-luxury-editor">
-                         <ReactQuill 
-                           theme="snow"
-                           value={newDesigner.bio}
-                           onChange={(content) => setNewDesigner({ ...newDesigner, bio: content })}
-                           placeholder="Write about their brand legacy and couture vision..."
-                         />
-                       </div>
-                    </div>
-
-
-                    <div className="col-span-2 space-y-4">
-                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">Visual Identity</label>
-                      <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex items-center justify-center">
-                          {newDesigner.image ? <img src={newDesigner.image} className="w-full h-full object-cover" /> : <p className="text-[8px] text-white/20 uppercase text-center">No Profile</p>}
+                  <div className="space-y-12">
+                    {/* Identity Section */}
+                    <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 1: Identity & Legal</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="col-span-2">
+                           <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Designer Full Name</label>
+                           <input type="text" placeholder="e.g. Faraz Manan" required className="admin-input w-full" value={newDesigner.name} onChange={(e) => setNewDesigner({ ...newDesigner, name: e.target.value })} />
                         </div>
-                        <div className="flex-1 space-y-2">
-                           <input type="text" placeholder="Featured Image URL" className="admin-input" value={newDesigner.image} onChange={(e) => setNewDesigner({ ...newDesigner, image: e.target.value })} />
-                           <input type="file" accept="image/*" onChange={(e) => {
-                             const file = e.target.files?.[0];
-                             if (file) {
-                               const reader = new FileReader();
-                               reader.onloadend = () => setNewDesigner({ ...newDesigner, image: reader.result as string });
-                               reader.readAsDataURL(file);
-                             }
-                           }} className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer w-full" />
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Email Address (For Login)</label>
+                          <input type="email" placeholder="designer@example.com" required className="admin-input" value={newDesigner.email || ''} onChange={(e) => setNewDesigner({ ...newDesigner, email: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Account Password</label>
+                          <input type="text" placeholder="Set a secure password" required className="admin-input" value={newDesigner.password || ''} onChange={(e) => setNewDesigner({ ...newDesigner, password: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">CNIC / ID Number</label>
+                          <input type="text" placeholder="42101-0000000-1" className="admin-input" value={newDesigner.cnic || ''} onChange={(e) => setNewDesigner({ ...newDesigner, cnic: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Passport Number (Optional)</label>
+                          <input type="text" placeholder="AB1234567" className="admin-input" value={newDesigner.passport || ''} onChange={(e) => setNewDesigner({ ...newDesigner, passport: e.target.value })} />
                         </div>
                       </div>
                     </div>
 
-                    <div className="col-span-2">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">Brand Logo URL</label>
-                       <input type="text" placeholder="/logos/brand.png" className="admin-input" value={newDesigner.logo} onChange={(e) => setNewDesigner({ ...newDesigner, logo: e.target.value })} />
+                    {/* Business Section */}
+                    <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 2: Brand Profile</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Business / Brand Name</label>
+                          <input type="text" placeholder="e.g. Faraz Manan Couture" required className="admin-input" value={newDesigner.businessName || ''} onChange={(e) => setNewDesigner({ ...newDesigner, businessName: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Category</label>
+                          <select className="admin-input bg-luxury-black" value={newDesigner.specialty} onChange={(e) => setNewDesigner({ ...newDesigner, specialty: e.target.value })}>
+                            <option value="">Select Category</option>
+                            <option value="Bridal">Bridal Couture</option>
+                            <option value="Pret">Luxury Pret</option>
+                            <option value="Formal">Men's Formal</option>
+                            <option value="Jewelry">Luxury Jewelry</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Experience (Years)</label>
+                          <input type="number" placeholder="10" required className="admin-input" value={newDesigner.experience || ''} onChange={(e) => setNewDesigner({ ...newDesigner, experience: e.target.value })} />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">City</label>
+                          <input type="text" placeholder="Lahore / Dubai" required className="admin-input" value={newDesigner.location} onChange={(e) => setNewDesigner({ ...newDesigner, location: e.target.value })} />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Complete Physical Address</label>
+                          <textarea placeholder="Full business address..." className="admin-input min-h-[80px]" value={newDesigner.address || ''} onChange={(e) => setNewDesigner({ ...newDesigner, address: e.target.value })} />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Portfolio / Social Links (Comma separated)</label>
+                          <input type="text" placeholder="Instagram URL, Website..." className="admin-input w-full" value={newDesigner.links} onChange={(e) => setNewDesigner({ ...newDesigner, links: e.target.value })} />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Brand Bio</label>
+                          <div className="quill-luxury-editor">
+                            <ReactQuill theme="snow" value={newDesigner.bio || ''} onChange={(content) => setNewDesigner({ ...newDesigner, bio: content })} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="col-span-2">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">External Links (Comma separated)</label>
-                       <input type="text" placeholder="Instagram URL, Portfolio URL..." className="admin-input" value={newDesigner.links} onChange={(e) => setNewDesigner({ ...newDesigner, links: e.target.value })} />
+                    {/* Verification Documents */}
+                    <div className="space-y-8 bg-white/[0.02] p-8 border border-white/5">
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary-gold">Stage 3: Dossier & Verification</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        {/* Profile Image */}
+                        <div className="col-span-2 p-6 bg-white/5 border border-white/10">
+                          <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Main Profile Visual</label>
+                          <div className="flex items-center gap-8">
+                            <div className="w-20 h-28 bg-black/40 border border-white/5 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
+                              {newDesigner.image ? <img src={newDesigner.image} className="w-full h-full object-cover" /> : <p className="text-[8px] text-white/10 uppercase">Empty</p>}
+                            </div>
+                            <input type="file" accept="image/*" onChange={async (e) => {
+                               const file = e.target.files?.[0];
+                               if (file) {
+                                 const formData = new FormData();
+                                 formData.append('file', file);
+                                 const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                                 const data = await res.json();
+                                 if (data.success) setNewDesigner({ ...newDesigner, image: data.url });
+                               }
+                            }} className="text-[10px] text-white/40 file:bg-primary-gold file:border-none file:text-luxury-black file:px-6 file:py-3 file:font-black file:uppercase file:tracking-widest cursor-pointer" />
+                          </div>
+                        </div>
+
+                        {/* KYC Docs */}
+                        {[
+                          { label: "ID Front", key: "cnicFront" },
+                          { label: "ID Back", key: "cnicBack" },
+                          { label: "Selfie with ID", key: "selfieWithCnic" }
+                        ].map(doc => (
+                          <div key={doc.key} className="space-y-4">
+                            <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block">{doc.label}</label>
+                            <div className="flex items-center gap-4">
+                              <div className="w-16 h-10 bg-black/40 border border-white/5 overflow-hidden flex items-center justify-center shadow-xl">
+                                {(newDesigner as any).documents?.[doc.key] ? <img src={(newDesigner as any).documents[doc.key]} className="w-full h-full object-cover" /> : <div className="w-2 h-2 bg-white/5 rounded-full" />}
+                              </div>
+                              <input type="file" accept="image/*" onChange={async (e) => {
+                                 const file = e.target.files?.[0];
+                                 if (file) {
+                                   const formData = new FormData();
+                                   formData.append('file', file);
+                                   const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                                   const data = await res.json();
+                                   if (data.success) {
+                                     setNewDesigner({ 
+                                       ...newDesigner, 
+                                       documents: { ...(newDesigner as any).documents, [doc.key]: data.url } 
+                                     } as any);
+                                   }
+                                 }
+                              }} className="text-[8px] text-white/20 file:bg-white/5 file:border-none file:text-white/40 file:px-3 file:py-1.5 file:uppercase file:tracking-widest cursor-pointer" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="col-span-2">
-                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-2">Collection Showcase (Comma separated URLs)</label>
-                       <textarea placeholder="URL 1, URL 2..." className="w-full bg-transparent border-b border-white/10 py-1 text-white focus:outline-none focus:border-primary-gold transition-all text-sm h-20" value={newDesigner.collections} onChange={(e) => setNewDesigner({ ...newDesigner, collections: e.target.value })} />
+                    {/* Membership Tier */}
+                    <div className="bg-white/[0.02] p-8 border border-white/5">
+                       <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Membership Access Level</label>
+                       <select className="admin-input bg-luxury-black w-full" value={newDesigner.tier} onChange={(e) => setNewDesigner({ ...newDesigner, tier: e.target.value as any })}>
+                          <option value="">Select Created Plan</option>
+                          {Array.isArray(plans) && plans.map((plan) => (
+                            <option key={plan?._id || plan?.name} value={plan?.name || ''}>
+                              {plan?.name || 'Unnamed Plan'} Member
+                            </option>
+                          ))}
+                          {(!plans || plans.length === 0) && <option disabled>No plans created yet</option>}
+                       </select>
                     </div>
                   </div>
                 ) : activeTab === 'events' ? (
@@ -942,33 +1065,6 @@ export default function AdminDashboard() {
                           }
                         }} className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer" />
                       </div>
-                    </div>
-                  </div>
-                ) : activeTab === 'gallery' ? (
-                  <div className="space-y-8">
-                    <div>
-                      <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold block mb-4">Gallery Image</label>
-                      <div className="flex items-center gap-6">
-                        <div className="w-32 h-20 bg-white/5 border border-white/10 rounded-sm overflow-hidden flex items-center justify-center">
-                          {newGalleryItem.imageUrl ? <img src={newGalleryItem.imageUrl} className="w-full h-full object-cover" /> : <svg className="w-8 h-8 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>}
-                        </div>
-                        <div className="flex-1 space-y-4">
-                          <input type="text" placeholder="Image URL (e.g. /events images/xxx.jpg)" required className="admin-input" value={newGalleryItem.imageUrl} onChange={(e) => setNewGalleryItem({ ...newGalleryItem, imageUrl: e.target.value })} />
-                          <p className="text-[8px] uppercase tracking-widest text-white/20">OR UPLOAD NEW</p>
-                          <input type="file" accept="image/*" onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () => setNewGalleryItem({ ...newGalleryItem, imageUrl: reader.result as string });
-                              reader.readAsDataURL(file);
-                            }
-                          }} className="text-[10px] text-white/40 file:bg-white/5 file:border-none file:text-white file:px-4 file:py-2 file:text-[9px] file:uppercase file:tracking-widest hover:file:bg-white/10 cursor-pointer" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-8">
-                      <input type="text" placeholder="Display Title" required className="admin-input" value={newGalleryItem.title} onChange={(e) => setNewGalleryItem({ ...newGalleryItem, title: e.target.value })} />
-                      <input type="text" placeholder="Category (e.g. Runway)" required className="admin-input" value={newGalleryItem.category} onChange={(e) => setNewGalleryItem({ ...newGalleryItem, category: e.target.value })} />
                     </div>
                   </div>
                 ) : (
