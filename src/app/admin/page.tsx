@@ -784,7 +784,7 @@ export default function AdminDashboard() {
                             <p className="text-[10px] uppercase tracking-widest text-white/20 font-bold">{pay.userId?.email}</p>
                           </td>
                           <td className="py-10 px-10">
-                            <p className="text-xs text-primary-gold font-bold mb-1 tracking-widest">{pay.transactionId}</p>
+                            <p className="text-xs text-primary-gold font-bold mb-1 tracking-widest">{pay.transactionId ? `****${pay.transactionId.slice(-4)}` : 'N/A'}</p>
                             <p className="text-[9px] uppercase text-white/30 font-bold">{new Date(pay.createdAt).toLocaleString()}</p>
                           </td>
                           <td className="py-10 px-10">
