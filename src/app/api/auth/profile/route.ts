@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
+import { sendMembershipEmail } from '@/lib/email';
 
 export async function GET() {
   try {
@@ -35,6 +36,23 @@ export async function GET() {
     const user = await User.findById((decoded as any).id).select('-password');
     if (!user) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+    }
+
+    // AUTO-EXPIRY LOGIC
+    if (user.membership?.status === 'ACTIVE' && user.membership?.expiryDate) {
+      const expiry = new Date(user.membership.expiryDate);
+      const now = new Date();
+      if (now > expiry) {
+        user.membership.status = 'EXPIRED';
+        await user.save();
+        
+        // Send Expiry Email
+        try {
+          await sendMembershipEmail(user.email, user.name, user.membership.plan, 'EXPIRED');
+        } catch (emailErr) {
+          console.error("Expiry email failed:", emailErr);
+        }
+      }
     }
 
     return NextResponse.json({ success: true, user });

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import dbConnect from '@/lib/dbConnect';
 import User, { KYCStatus, UserRole } from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
+import { sendKYCStatusEmail } from '@/lib/email';
 
 export async function GET() {
   try {
@@ -47,6 +48,13 @@ export async function POST(req: Request) {
       user.kycData.adminFeedback = feedback;
     }
     await user.save();
+
+    // Send status update email
+    try {
+      await sendKYCStatusEmail(user.email, user.name, status, feedback);
+    } catch (emailError) {
+      console.error('Failed to send KYC status email:', emailError);
+    }
 
     return NextResponse.json({ success: true, message: `Application ${status}` });
   } catch (error) {

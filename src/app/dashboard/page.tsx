@@ -14,10 +14,12 @@ export default function DesignerDashboard() {
   const [newCard, setNewCard] = useState({ number: '', expiry: '', cvc: '' });
   const [events, setEvents] = useState<any[]>([]);
   const [appliedEvents, setAppliedEvents] = useState<string[]>([]);
+  const [fullApplications, setFullApplications] = useState<any[]>([]);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [isEditingPortfolio, setIsEditingPortfolio] = useState(false);
   const [portfolioForm, setPortfolioForm] = useState({ brandBio: '', images: [] as string[] });
   const [uploading, setUploading] = useState(false);
+  const [selectedEventDetails, setSelectedEventDetails] = useState<any>(null);
   const router = useRouter();
 
   const fetchDashboardData = async () => {
@@ -47,7 +49,10 @@ export default function DesignerDashboard() {
       }
 
       if (eventsData.success) setEvents(eventsData.events.slice(0, 3));
-      if (appsData.success) setAppliedEvents(appsData.applications.map((a: any) => a.event));
+      if (appsData.success) {
+        setAppliedEvents(appsData.applications.map((a: any) => a.event?._id || a.event));
+        setFullApplications(appsData.applications || []);
+      }
 
     } catch (err) {
       console.error("Dashboard fetch failed", err);
@@ -340,16 +345,71 @@ export default function DesignerDashboard() {
 
                     <div className="p-6 bg-white/[0.02] border border-white/5">
                       <p className="text-[10px] font-black uppercase tracking-widest text-primary-gold mb-3">Brand Bio</p>
-                      <p className="text-sm font-serif italic text-white/60 leading-relaxed">
-                        {user?.portfolio?.brandBio || "Your professional brand biography will appear here."}
-                      </p>
+                      <div 
+                        className="text-sm font-serif italic text-white/60 leading-relaxed quill-content"
+                        dangerouslySetInnerHTML={{ __html: user?.portfolio?.brandBio || "Your professional brand biography will appear here." }}
+                      />
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </motion.div>
 
-            {/* Featured Events spotlight */}
+            {/* Showcase Participation Status */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white/[0.03] border border-white/10 p-8 rounded-sm"
+            >
+              <div className="flex justify-between items-center mb-10">
+                <div>
+                  <h3 className="text-xl font-serif font-bold italic">Showcase Applications</h3>
+                  <p className="text-[9px] uppercase tracking-[0.2em] text-white/30 mt-1">Tracking your global participation</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {fullApplications.length > 0 ? (
+                  fullApplications.map((app) => (
+                    <div key={app._id} className="bg-white/[0.02] border border-white/5 p-6 flex flex-col md:flex-row justify-between items-center gap-6 group hover:border-primary-gold/20 transition-all">
+                      <div className="flex items-center gap-6 w-full md:w-auto">
+                        <div className="w-12 h-16 bg-black/40 border border-white/5 overflow-hidden hidden md:block">
+                           <img src={app.event?.image || '/event-group.jpg'} className="w-full h-full object-cover grayscale opacity-50" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-white mb-1">{app.event?.title || 'Unknown Event'}</h4>
+                          <p className="text-[9px] text-white/30 uppercase tracking-widest font-medium">{app.event?.location} • {app.event?.startDate}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end">
+                        <div className="text-right">
+                          <p className="text-[8px] uppercase tracking-widest text-white/20 mb-1">Status</p>
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-full border ${
+                            app.status === 'APPROVED' ? 'bg-secondary-emerald/10 text-secondary-emerald border-secondary-emerald/20' : 
+                            app.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 
+                            'bg-primary-gold/10 text-primary-gold border-primary-gold/20'
+                          }`}>
+                            {app.status === 'APPROVED' ? 'Selected' : app.status === 'REJECTED' ? 'Not Selected' : 'Under Review'}
+                          </span>
+                        </div>
+                         <button 
+                          onClick={() => setSelectedEventDetails(app.event)}
+                          className="p-3 bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-primary-gold transition-all"
+                         >
+                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                         </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-12 text-center border border-dashed border-white/5 rounded-sm">
+                    <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.4em]">No active applications in the registry</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Elite Calendar spotlight */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -370,7 +430,7 @@ export default function DesignerDashboard() {
                     <p className="text-[8px] font-bold text-primary-gold uppercase tracking-widest mb-3">{event.type}</p>
                     <h4 className="text-lg font-serif font-bold mb-4 line-clamp-1">{event.title}</h4>
                     <div className="space-y-2 mb-8">
-                       <p className="text-[9px] text-white/40 uppercase tracking-widest font-medium">{event.date || 'TBA 2026'}</p>
+                       <p className="text-[9px] text-white/40 uppercase tracking-widest font-medium">{event.startDate} — {event.endDate}</p>
                        <p className="text-[9px] text-white/40 uppercase tracking-widest font-medium">{event.location}</p>
                     </div>
                     <button 
@@ -488,11 +548,24 @@ export default function DesignerDashboard() {
                          type="text" 
                          placeholder="CARD NUMBER" 
                          className="w-full bg-black/40 border-b border-white/10 py-4 text-white focus:outline-none focus:border-primary-gold text-[10px] font-bold tracking-[0.2em]"
+                         value={newCard.number || ''}
                          onChange={(e) => setNewCard({...newCard, number: e.target.value})}
                        />
                        <div className="grid grid-cols-2 gap-8">
-                         <input type="text" placeholder="MM / YY" className="w-full bg-black/40 border-b border-white/10 py-4 text-white focus:outline-none focus:border-primary-gold text-[10px] font-bold tracking-[0.2em]" />
-                         <input type="text" placeholder="CVC" className="w-full bg-black/40 border-b border-white/10 py-4 text-white focus:outline-none focus:border-primary-gold text-[10px] font-bold tracking-[0.2em]" />
+                         <input 
+                           type="text" 
+                           placeholder="MM / YY" 
+                           className="w-full bg-black/40 border-b border-white/10 py-4 text-white focus:outline-none focus:border-primary-gold text-[10px] font-bold tracking-[0.2em]" 
+                           value={newCard.expiry || ''}
+                           onChange={(e) => setNewCard({...newCard, expiry: e.target.value})}
+                         />
+                         <input 
+                           type="text" 
+                           placeholder="CVC" 
+                           className="w-full bg-black/40 border-b border-white/10 py-4 text-white focus:outline-none focus:border-primary-gold text-[10px] font-bold tracking-[0.2em]" 
+                           value={newCard.cvc || ''}
+                           onChange={(e) => setNewCard({...newCard, cvc: e.target.value})}
+                         />
                        </div>
                        <div className="flex gap-4 pt-6">
                           <button onClick={handleUpdateCard} disabled={updating} className="flex-1 bg-primary-gold text-luxury-black py-4 text-[9px] font-black uppercase tracking-widest">{updating ? 'SAVING...' : 'SAVE CARD'}</button>
@@ -508,6 +581,70 @@ export default function DesignerDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Event Details Modal */}
+      <AnimatePresence>
+        {selectedEventDetails && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-luxury-black/98 backdrop-blur-3xl flex items-center justify-center p-6"
+            onClick={() => setSelectedEventDetails(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              className="bg-white/[0.03] border border-white/10 p-12 max-w-2xl w-full relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={() => setSelectedEventDetails(null)} className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+
+              <div className="mb-8">
+                <p className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[9px] mb-4">{selectedEventDetails.type} • Showcase</p>
+                <h3 className="text-4xl font-serif font-bold text-white uppercase tracking-tighter italic leading-none">{selectedEventDetails.title}</h3>
+              </div>
+
+              <div className="aspect-video bg-black/40 border border-white/5 mb-8 overflow-hidden">
+                <img src={selectedEventDetails.image || '/event-group.jpg'} className="w-full h-full object-cover grayscale opacity-70" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-8 mb-10 border-y border-white/5 py-8">
+                <div>
+                   <p className="text-[9px] uppercase tracking-widest text-white/30 font-bold mb-2">Strategic Location</p>
+                   <p className="text-sm font-bold text-white uppercase tracking-widest">{selectedEventDetails.location}</p>
+                </div>
+                <div>
+                   <p className="text-[9px] uppercase tracking-widest text-white/30 font-bold mb-2">Scheduled Period</p>
+                   <p className="text-sm font-bold text-white uppercase tracking-widest">
+                     {selectedEventDetails.startDate ? 
+                       `${new Date(selectedEventDetails.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} — ${new Date(selectedEventDetails.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` 
+                       : (selectedEventDetails.date || 'To Be Announced')}
+                   </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                 <p className="text-[10px] uppercase tracking-widest text-primary-gold font-bold">Showcase Brief</p>
+                 <div 
+                   className="text-sm text-white/60 leading-relaxed font-serif italic"
+                   dangerouslySetInnerHTML={{ __html: selectedEventDetails.description || 'No detailed brief available for this showcase.' }}
+                 />
+              </div>
+
+              <button 
+                onClick={() => setSelectedEventDetails(null)}
+                className="mt-12 w-full py-5 border border-primary-gold/30 text-primary-gold text-[10px] font-black uppercase tracking-widest hover:bg-primary-gold hover:text-luxury-black transition-all"
+              >
+                Close Briefing
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

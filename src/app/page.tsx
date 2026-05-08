@@ -124,7 +124,7 @@ export default function Home() {
         <div className="container mx-auto px-6 relative z-10">
           <AnimatedSection className="border border-primary-gold/30 p-8 md:p-16 lg:p-24 bg-luxury-black/60 backdrop-blur-md relative overflow-hidden group hover:border-primary-gold/60 transition-colors duration-500">
              <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
-                <h3 className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[12px]">Pride of the Nation</h3>
+                <h3 className="text-primary-gold font-bold uppercase tracking-[0.4em] text-[12px]">Passion for Pakistani Fashion</h3>
                 <span className="brand-gradient text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] px-6 py-3 shadow-[0_0_30px_rgba(0,79,52,0.4)]">
                   June 6th - 7th, 2026
                 </span>
@@ -152,7 +152,7 @@ export default function Home() {
                  <span>Table (10): £900</span>
                </div>
                <div className="hidden sm:block w-px h-8 bg-white/20"></div>
-               <Link href="/events/glasgow-2026" className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-gold hover:text-white transition-colors flex items-center gap-2">
+               <Link href="/events" className="text-[10px] font-black uppercase tracking-[0.3em] text-primary-gold hover:text-white transition-colors flex items-center gap-2">
                  View Details <span>→</span>
                </Link>
              </div>

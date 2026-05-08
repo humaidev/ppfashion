@@ -16,8 +16,8 @@ export async function GET() {
     if (!decoded) return NextResponse.json({ success: false, message: 'Invalid token' }, { status: 401 });
 
     const applications = await EventApplication.find({ designer: (decoded as any).id })
-      .populate('event')
-      .sort({ appliedAt: -1 });
+      .populate({ path: 'event' })
+      .sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, applications });
   } catch (error) {

@@ -120,13 +120,43 @@ export default function MembershipPage() {
               </div>
 
               <div className="space-y-6">
-                <button
-                  disabled={processing}
-                  onClick={() => handlePurchase(plan)}
-                  className={`w-full text-center font-black py-6 rounded-sm transition-all uppercase tracking-[0.3em] text-[10px] shadow-2xl brand-gradient brand-gradient-hover text-white hover:scale-[1.02] active:scale-[0.98] ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {processing ? "Initializing..." : (user?.kycStatus === 'APPROVED' || user?.role === 'ADMIN') ? `Activate ${plan.name}` : "Become Member"}
-                </button>
+                {(() => {
+                  const isCurrentPlan = user?.membership?.plan === plan.name && user?.membership?.status === 'ACTIVE';
+                  
+                  // Calculate days until expiry
+                  let daysUntilExpiry = 999;
+                  if (user?.membership?.expiryDate) {
+                    const expiry = new Date(user.membership.expiryDate);
+                    const now = new Date();
+                    daysUntilExpiry = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                  }
+
+                  const showRenew = isCurrentPlan && daysUntilExpiry <= 7;
+
+                  if (isCurrentPlan && !showRenew) {
+                    return (
+                      <button className="w-full text-center font-black py-6 rounded-sm uppercase tracking-[0.3em] text-[10px] bg-secondary-emerald/20 text-secondary-emerald border border-secondary-emerald/30 cursor-default">
+                        Current Active Plan
+                      </button>
+                    );
+                  }
+
+                  const isUpgrade = user?.membership?.status === 'ACTIVE' && !isCurrentPlan;
+
+                  return (
+                    <button
+                      disabled={processing}
+                      onClick={() => handlePurchase(plan)}
+                      className={`w-full text-center font-black py-6 rounded-sm transition-all uppercase tracking-[0.3em] text-[10px] shadow-2xl brand-gradient brand-gradient-hover text-white hover:scale-[1.02] active:scale-[0.98] ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {processing ? "Initializing..." : 
+                        showRenew ? "Renew Membership" :
+                        isUpgrade ? `Upgrade to ${plan.name}` : 
+                        (user?.kycStatus === 'APPROVED' || user?.role === 'ADMIN') ? `Activate ${plan.name}` : "Become Member"
+                      }
+                    </button>
+                  );
+                })()}
                 {plan.interval === 'monthly' && (
                   <p className="text-center text-[9px] uppercase tracking-widest text-white/20 font-bold">
                     Or pay annually and save 15%

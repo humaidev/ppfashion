@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from 'react-hot-toast';
 import KYCDetailModal from "@/components/admin/KYCDetailModal";
 import EventAppDetailModal from "@/components/admin/EventAppDetailModal";
+import InquiryDetailModal from "@/components/admin/InquiryDetailModal";
 import dynamic from "next/dynamic";
 import 'react-quill-new/dist/quill.snow.css';
 
@@ -56,7 +57,6 @@ interface IEvent {
   location: string;
   status: string;
   type: string;
-  price: string;
   image: string;
 }
 
@@ -69,8 +69,18 @@ interface IBlog {
   image: string;
 }
 
+interface IInquiry {
+  _id: string;
+  fullName: string;
+  email: string;
+  type: string;
+  message: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'newsletter' | 'kyc' | 'eventApps' | 'membership' | 'designers' | 'payments' | 'events' | 'blogs' | 'plans'>('newsletter');
+  const [activeTab, setActiveTab] = useState<'newsletter' | 'kyc' | 'eventApps' | 'membership' | 'designers' | 'payments' | 'events' | 'blogs' | 'plans' | 'inquiries'>('newsletter');
   const [editMode, setEditMode] = useState<string | null>(null);
   const [subscribers, setSubscribers] = useState<ISubscriber[]>([]);
   const [designers, setDesigners] = useState<IDesigner[]>([]);
@@ -81,10 +91,12 @@ export default function AdminDashboard() {
   const [eventApps, setEventApps] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [inquiries, setInquiries] = useState<IInquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedKYC, setSelectedKYC] = useState<any>(null);
   const [selectedEventApp, setSelectedEventApp] = useState<any>(null);
+  const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
 
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ id: string, type: string } | null>(null);
@@ -117,7 +129,7 @@ export default function AdminDashboard() {
     }
   });
 
-  const [newEvent, setNewEvent] = useState({ title: '', startDate: '', endDate: '', location: '', type: '', price: '', status: 'Applications Open', image: '' });
+  const [newEvent, setNewEvent] = useState({ title: '', startDate: '', endDate: '', location: '', type: '', status: 'Applications Open', image: '' });
   const [newPlan, setNewPlan] = useState({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
   const [newBlog, setNewBlog] = useState({ title: '', excerpt: '', content: '', author: '', image: '' });
 
@@ -177,7 +189,8 @@ export default function AdminDashboard() {
             activeTab === 'eventApps' ? '/api/admin/event-applications' :
               activeTab === 'plans' ? '/api/admin/plans' :
                 activeTab === 'payments' ? '/api/payment' :
-                  activeTab === 'blogs' ? '/api/admin/blogs' : '/api/admin/events';
+                  activeTab === 'blogs' ? '/api/admin/blogs' :
+                    activeTab === 'inquiries' ? '/api/admin/inquiries' : '/api/admin/events';
 
 
     try {
@@ -197,6 +210,7 @@ export default function AdminDashboard() {
         if (activeTab === 'kyc') setKycApps(data.applications || []);
         if (activeTab === 'eventApps') setEventApps(data.applications || []);
         if (activeTab === 'plans') setPlans(data.plans || []);
+        if (activeTab === 'inquiries') setInquiries(data.inquiries || []);
       }
 
     } catch (err) {
@@ -279,7 +293,8 @@ export default function AdminDashboard() {
         type === 'blogs' ? `/api/admin/blogs?id=${id}` :
           type === 'gallery' ? `/api/admin/gallery?id=${id}` :
             type === 'subscribers' ? `/api/admin/subscribers?id=${id}` :
-              `/api/admin/plans?id=${id}`;
+              type === 'inquiries' ? `/api/admin/inquiries?id=${id}` :
+                `/api/admin/plans?id=${id}`;
 
 
     const t = toast.loading("De-registering...");
@@ -321,7 +336,7 @@ export default function AdminDashboard() {
       });
     } else if (activeTab === 'events') {
 
-      setNewEvent({ title: item.title, startDate: item.startDate, endDate: item.endDate, location: item.location, type: item.type, price: item.price, status: item.status, image: item.image });
+      setNewEvent({ title: item.title, startDate: item.startDate, endDate: item.endDate, location: item.location, type: item.type, status: item.status, image: item.image });
     } else if (activeTab === 'blogs') {
       setNewBlog({ title: item.title, excerpt: item.excerpt, content: item.content, author: item.author, image: item.image });
     } else {
@@ -356,7 +371,7 @@ export default function AdminDashboard() {
         license: ''
       }
     });
-    setNewEvent({ title: '', startDate: '', endDate: '', location: '', type: '', price: '', status: 'Applications Open', image: '' });
+    setNewEvent({ title: '', startDate: '', endDate: '', location: '', type: '', status: 'Applications Open', image: '' });
     setNewPlan({ name: '', price: '', currency: '£', interval: 'monthly', description: '', features: '', isPopular: false });
     setNewBlog({ title: '', excerpt: '', content: '', author: '', image: '' });
   };
@@ -443,6 +458,25 @@ export default function AdminDashboard() {
     }
   }
 
+  async function handleToggleFeatured(id: string, current: boolean) {
+    const t = toast.loading(current ? "Removing from spotlight..." : "Spotlighting designer...");
+    try {
+      const res = await fetch('/api/admin/designers', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isFeatured: !current })
+      });
+      if (res.ok) {
+        toast.success(current ? "Removed from spotlight" : "Designer now featured", { id: t });
+        fetchData();
+      } else {
+        toast.error("Toggle failed", { id: t });
+      }
+    } catch (err) {
+      toast.error("Network error", { id: t });
+    }
+  }
+
   return (
     <div className="min-h-screen bg-luxury-black text-white py-12 px-6 overflow-hidden relative">
       <Toaster position="top-right" toastOptions={{ style: { background: '#0A0A0A', color: '#fff', border: '1px solid rgba(232, 209, 150, 0.2)', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' } }} />
@@ -508,6 +542,7 @@ export default function AdminDashboard() {
               { id: 'events', label: 'Global Events', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z' },
               { id: 'blogs', label: 'Journal / Blog', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
               { id: 'plans', label: 'Membership Plans', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+              { id: 'inquiries', label: 'Inquiries', icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -582,7 +617,8 @@ export default function AdminDashboard() {
                                   activeTab === 'plans' ? 'Plan Name / Interval' :
                                     activeTab === 'payments' ? 'Designer / User' :
                                       activeTab === 'designers' ? 'Designer / Location' :
-                                        activeTab === 'blogs' ? 'Post Title / Author' : 'Event / Type'}
+                                        activeTab === 'blogs' ? 'Post Title / Author' :
+                                          activeTab === 'inquiries' ? 'Sender / Type' : 'Event / Type'}
                         </th>
                         <th className="py-8 px-10 text-[9px] font-black uppercase tracking-widest text-white/40">
                           {activeTab === 'newsletter' ? 'Contact Email' :
@@ -592,7 +628,8 @@ export default function AdminDashboard() {
                                   activeTab === 'plans' ? 'Pricing / Description' :
                                     activeTab === 'payments' ? 'Transaction / ID' :
                                       activeTab === 'designers' ? 'Specialty / Tier' :
-                                        activeTab === 'blogs' ? 'Date / Excerpt' : 'Date / Venue'}
+                                        activeTab === 'blogs' ? 'Date / Excerpt' :
+                                          activeTab === 'inquiries' ? 'Message Preview' : 'Date / Venue'}
                         </th>
                         <th className="py-8 px-10 text-[9px] font-black uppercase tracking-widest text-white/40">
                           {activeTab === 'newsletter' ? 'Tier Status' :
@@ -600,7 +637,8 @@ export default function AdminDashboard() {
                               activeTab === 'plans' ? 'Visibility' :
                                 activeTab === 'payments' ? 'Amount / Method' :
                                   activeTab === 'designers' ? 'Account Profile' :
-                                    activeTab === 'blogs' ? 'Status' : 'Approval Status'}
+                                    activeTab === 'blogs' ? 'Status' :
+                                      activeTab === 'inquiries' ? 'Received Date' : 'Approval Status'}
                         </th>
                         <th className="py-8 px-10 text-right text-[9px] font-black uppercase tracking-widest text-white/40">Management</th>
                       </tr>
@@ -637,8 +675,8 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-10 px-10">
                             <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${app.kycStatus === 'APPROVED' ? 'bg-secondary-emerald/20 text-secondary-emerald border-secondary-emerald/20' :
-                                app.kycStatus === 'REJECTED' ? 'bg-red-500/20 text-red-500 border-red-500/20' :
-                                  'bg-primary-gold/10 text-primary-gold border-primary-gold/20'
+                              app.kycStatus === 'REJECTED' ? 'bg-red-500/20 text-red-500 border-red-500/20' :
+                                'bg-primary-gold/10 text-primary-gold border-primary-gold/20'
                               }`}>{app.kycStatus}</span>
                           </td>
                           <td className="py-10 px-10 text-right">
@@ -678,12 +716,12 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-10 px-10">
                             <p className="text-xs text-white/40 mb-1">{app.designer?.email}</p>
-                            <p className="text-[9px] font-bold uppercase text-white/20">{app.event?.date}</p>
+                            <p className="text-[9px] font-bold uppercase text-white/20">{app.event?.startDate}</p>
                           </td>
                           <td className="py-10 px-10">
                             <span className={`text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border ${app.status === 'APPROVED' ? 'bg-secondary-emerald/20 text-secondary-emerald border-secondary-emerald/20' :
-                                app.status === 'REJECTED' ? 'bg-red-500/20 text-red-500 border-red-500/20' :
-                                  'bg-white/10 text-white/40 border-white/5'
+                              app.status === 'REJECTED' ? 'bg-red-500/20 text-red-500 border-red-500/20' :
+                                'bg-white/10 text-white/40 border-white/5'
                               }`}>{app.status}</span>
                           </td>
                           <td className="py-10 px-10 text-right">
@@ -781,6 +819,9 @@ export default function AdminDashboard() {
                           </td>
                           <td className="py-10 px-10 text-right">
                             <div className="flex justify-end gap-2 transition-opacity">
+                              <button onClick={() => handleToggleFeatured(des._id, des.isFeatured)} className={`p-3 border transition-all ${des.isFeatured ? 'bg-primary-gold text-luxury-black border-primary-gold' : 'bg-white/5 border-white/10 text-white/40 hover:text-primary-gold'}`} title={des.isFeatured ? "Unfeature" : "Mark as Featured"}>
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                              </button>
                               <button onClick={() => handleRenew(des._id)} className="p-3 bg-secondary-emerald/10 border border-secondary-emerald/20 text-secondary-emerald hover:bg-secondary-emerald hover:text-white transition-all" title="Renew Membership">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                               </button>
@@ -788,6 +829,31 @@ export default function AdminDashboard() {
                               <button onClick={() => setShowDeleteConfirm({ id: des._id, type: 'designers' })} className="p-3 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                               </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+
+                      {/* Inquiries Render */}
+                      {activeTab === 'inquiries' && inquiries.map((inq) => (
+                        <tr key={inq._id} className="group hover:bg-white/[0.02] transition-colors">
+                          <td className="py-10 px-10">
+                            <p className="text-sm font-bold text-white mb-1">{inq.fullName}</p>
+                            <p className="text-[10px] uppercase tracking-widest text-primary-gold/60 font-bold">{inq.type}</p>
+                          </td>
+                          <td className="py-10 px-10">
+                            <p className="text-xs text-white/60 mb-1">{inq.email}</p>
+                            <p className="text-[9px] font-bold uppercase text-white/20 italic line-clamp-1">{inq.message}</p>
+                          </td>
+                          <td className="py-10 px-10">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-white/40">{new Date(inq.createdAt).toLocaleDateString()}</span>
+                          </td>
+                          <td className="py-10 px-10 text-right">
+                            <div className="flex justify-end gap-2">
+                              <button onClick={() => setSelectedInquiry(inq)} className="p-3 bg-white/5 border border-white/10 text-white hover:border-primary-gold transition-all" title="Read Message">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                              </button>
+                              <button onClick={() => setShowDeleteConfirm({ id: inq._id, type: 'inquiries' })} className="p-3 bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white transition-all"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                             </div>
                           </td>
                         </tr>
@@ -1052,7 +1118,6 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <input type="text" placeholder="Event Title (e.g. Couture Week 2026)" required className="admin-input col-span-2" value={newEvent.title} onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })} />
                       <input type="text" placeholder="Event Type (e.g. Fashion Show, Exhibition)" required className="admin-input" value={newEvent.type} onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })} />
-                      <input type="text" placeholder="Entry Price (e.g. From £50)" required className="admin-input" value={newEvent.price} onChange={(e) => setNewEvent({ ...newEvent, price: e.target.value })} />
 
                       <div className="space-y-2">
                         <label className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Commencement Date</label>
@@ -1203,6 +1268,16 @@ export default function AdminDashboard() {
         selectedApp={selectedEventApp}
         setSelectedApp={setSelectedEventApp}
         updateApp={updateEventApp}
+      />
+
+      <InquiryDetailModal
+        selectedInquiry={selectedInquiry}
+        setSelectedInquiry={setSelectedInquiry}
+      />
+
+      <InquiryDetailModal
+        selectedInquiry={selectedInquiry}
+        setSelectedInquiry={setSelectedInquiry}
       />
 
       {/* Full Screen Image Overlay */}

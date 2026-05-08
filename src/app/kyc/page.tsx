@@ -35,6 +35,7 @@ export default function KYCPage() {
   });
   const [plans, setPlans] = useState<any[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [hasPaid, setHasPaid] = useState(false);
 
   const [agreed, setAgreed] = useState(false);
 
@@ -92,6 +93,11 @@ export default function KYCPage() {
         if (data.user.kycStatus === 'APPROVED' || data.user.kycStatus === 'PENDING') {
            setStep(6); // Success / View mode
         }
+        
+        // CHECK IF ALREADY PAID
+        if (data.user.membershipTier === 'PAID' || data.user.membership?.status === 'ACTIVE') {
+          setHasPaid(true);
+        }
       }
     };
     const fetchPlans = async () => {
@@ -102,6 +108,33 @@ export default function KYCPage() {
     checkUser();
     fetchPlans();
   }, [router]);
+
+  const handleUpdateOnly = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/kyc/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          portfolioLinks: formData.portfolioLinks.split(",").map(s => s.trim()).filter(s => s)
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.removeItem("kyc_form_draft");
+        localStorage.removeItem("kyc_form_step");
+        setStep(6);
+      } else {
+        setError(data.message || "Update failed");
+      }
+    } catch (err) {
+      setError("Server error during update");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePaymentSuccess = async (paymentIntent: any) => {
     setLoading(true);
@@ -357,11 +390,16 @@ export default function KYCPage() {
                         setError("You must agree to the terms.");
                         return;
                       }
-                      nextStep();
+                      
+                      if (hasPaid) {
+                        handleUpdateOnly();
+                      } else {
+                        nextStep();
+                      }
                     }} 
                     className="kyc-btn-primary"
                    >
-                     Next: Membership & Payment →
+                     {hasPaid ? (loading ? 'PROCESSING...' : 'SUBMIT VERIFICATION UPDATE') : 'Next: Membership & Payment →'}
                    </button>
                 </div>
               </motion.div>

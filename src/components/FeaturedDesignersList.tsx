@@ -23,7 +23,7 @@ export default function FeaturedDesignersList() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.designers) {
-          setDesigners(data.designers.slice(0, 3)); // Only show top 3
+          setDesigners(data.designers.slice(0, 3)); // Showing top 3 designers for now
         }
         setLoading(false);
       });

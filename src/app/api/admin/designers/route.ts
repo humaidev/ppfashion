@@ -5,59 +5,45 @@ import User, { UserRole, KYCStatus } from '@/models/User';
 import Designer from '@/models/Designer';
 import bcrypt from 'bcryptjs';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const featuredOnly = searchParams.get('featured') === 'true';
+
+    const query = featuredOnly ? { isFeatured: true } : {};
     
-    // 1. Fetch ALL static Designer records (Admin added)
-    const staticDesigners = await Designer.find({}).lean();
+    // 1. Fetch static Designer records
+    const staticDesigners = await Designer.find(query).lean();
     
-    // 2. Fetch ALL Users who are Designers
-    const userDesigners = await User.find({ role: UserRole.DESIGNER }).lean();
+    // 2. Fetch Users who are Designers
+    const userDesigners = await User.find({ role: UserRole.DESIGNER, ...query }).lean();
 
     // 3. Transform User data to match Designer format
     const transformedUsers = userDesigners.map(u => {
       const portfolioImages = (u as any).portfolio?.images || [];
       const primaryImage = portfolioImages.length > 0 ? portfolioImages[0] : (u as any).image;
-      const brandLogo = (u as any).portfolio?.brandLogo;
       
       return {
         _id: u._id.toString(),
         name: u.name || u.email || "Unnamed Designer",
         email: u.email,
         specialty: (u as any).kycData?.category || (u as any).portfolio?.brandBio?.substring(0, 50) || "Couture Visionary",
-        image: primaryImage && primaryImage.trim() !== "" ? primaryImage : 
-               brandLogo && brandLogo.trim() !== "" ? brandLogo : "/hero.png", 
+        image: primaryImage && primaryImage.trim() !== "" ? primaryImage : "/hero.png", 
         tier: u.membership?.plan || "Basic",
         location: (u as any).kycData?.city || "UK/Pakistan",
-        address: (u as any).kycData?.address || "",
-        bio: (u as any).portfolio?.brandBio || "Exclusive Collective Member",
-        businessName: (u as any).kycData?.businessName || "",
-        experience: (u as any).kycData?.experience || 0,
-        cnic: (u as any).kycData?.cnic || "",
-        passport: (u as any).kycData?.passport || "",
-        portfolioLinks: (u as any).kycData?.portfolioLinks || [],
-        documents: (u as any).kycData?.documents || {},
+        isFeatured: u.isFeatured || false,
         isUserAccount: true
       };
     });
 
-    // Merge all records
     const combined = [...staticDesigners, ...transformedUsers];
-    
     const finalMap = new Map();
-    combined.forEach(item => {
-      if (!item.image || item.image.trim() === "") {
-        item.image = "/hero.png";
-      }
-      finalMap.set(item._id.toString(), item);
-    });
-    
+    combined.forEach(item => finalMap.set(item._id.toString(), item));
     const designers = Array.from(finalMap.values());
 
     return NextResponse.json({ success: true, designers });
   } catch (error: any) {
-    console.error("Designer fetch failed", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
@@ -129,46 +115,33 @@ export async function PUT(req: Request) {
   try {
     await dbConnect();
     const { id, ...data } = await req.json();
-    const { name, email, password, specialty, location, bio, image, tier, businessName, experience, cnic, passport, address, portfolioLinks, documents } = data;
 
     const user = await User.findById(id);
     if (user) {
+      // If it's a featured toggle only
+      if (Object.keys(data).length === 1 && data.hasOwnProperty('isFeatured')) {
+        const updated = await User.findByIdAndUpdate(id, { isFeatured: data.isFeatured }, { new: true });
+        return NextResponse.json({ success: true, designer: updated });
+      }
+
       const updatePayload: any = {
-        name,
-        email,
-        'membership.plan': tier,
-        'kycData.cnic': cnic,
-        'kycData.passport': passport,
-        'kycData.businessName': businessName,
-        'kycData.category': specialty,
-        'kycData.experience': Number(experience),
-        'kycData.city': location,
-        'kycData.address': address,
-        'kycData.documents': documents,
-        'portfolio.brandBio': bio,
-        'portfolio.brandLogo': image
+        name: data.name,
+        email: data.email,
+        'membership.plan': data.tier,
+        'kycData.cnic': data.cnic,
+        'kycData.passport': data.passport,
+        'kycData.businessName': data.businessName,
+        'kycData.category': data.specialty,
+        'kycData.experience': Number(data.experience),
+        'kycData.city': data.location,
+        'kycData.address': data.address,
+        'kycData.documents': data.documents,
+        'portfolio.brandBio': data.bio, // Syncing with dashboard
+        'portfolio.brandLogo': data.image
       };
 
-      // Fetch plan to determine interval for expiry
-      const Plan = mongoose.models.Plan || mongoose.model('Plan', new mongoose.Schema({ name: String, interval: String }));
-      const planDoc = await Plan.findOne({ name: tier || 'Basic' });
-      const interval = planDoc?.interval || 'monthly';
-      
-      const expiryDate = new Date();
-      if (interval === 'yearly') {
-        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-      } else {
-        expiryDate.setMonth(expiryDate.getMonth() + 1);
-      }
-      
-      updatePayload['membership.expiryDate'] = expiryDate;
-
-      if (portfolioLinks) {
-        updatePayload['kycData.portfolioLinks'] = Array.isArray(portfolioLinks) ? portfolioLinks : portfolioLinks.split(',').map((l: string) => l.trim());
-      }
-
-      if (password && password.trim() !== "") {
-        updatePayload.password = await bcrypt.hash(password, 10);
+      if (data.password && data.password.trim() !== "") {
+        updatePayload.password = await bcrypt.hash(data.password, 10);
       }
 
       const updatedUser = await User.findByIdAndUpdate(id, { $set: updatePayload }, { new: true });
@@ -178,7 +151,6 @@ export async function PUT(req: Request) {
     const designer = await Designer.findByIdAndUpdate(id, data, { new: true });
     return NextResponse.json({ success: true, designer });
   } catch (error: any) {
-    console.error("Designer update failed:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

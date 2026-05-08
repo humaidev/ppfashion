@@ -72,6 +72,7 @@ export interface IUser extends Document {
   // Verification
   isEmailVerified: boolean;
   verificationCode?: string;
+  isFeatured: boolean;
 
   createdAt: Date;
   updatedAt: Date;
@@ -127,6 +128,7 @@ const UserSchema: Schema = new Schema(
 
     isEmailVerified: { type: Boolean, default: false },
     verificationCode: { type: String },
+    isFeatured: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -9,12 +9,12 @@ import AnimatedSection from "@/components/AnimatedSection";
 interface IEvent {
   _id: string;
   title: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   location: string;
   type: string;
   image: string;
   status: string;
-  price: string;
 }
 
 export default function EventsPage() {
@@ -145,12 +145,12 @@ export default function EventsPage() {
                   <div className="p-10 flex flex-col flex-1">
                     <div className="flex justify-between items-center pt-2 mb-10">
                       <div className="flex flex-col gap-2">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">Entry Tier</p>
-                        <p className="text-xl md:text-2xl font-serif font-bold text-primary-gold">{event.price}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">Location</p>
+                        <p className="text-xl md:text-2xl font-serif font-bold text-primary-gold uppercase">{event.location}</p>
                       </div>
                       <div className="flex flex-col gap-2 text-right">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">Date & Location</p>
-                        <p className="text-xs font-bold text-white/70 uppercase tracking-widest">{event.date}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/30">Event Duration</p>
+                        <p className="text-xs font-bold text-white/70 uppercase tracking-widest">{event.startDate} — {event.endDate}</p>
                       </div>
                     </div>
                     

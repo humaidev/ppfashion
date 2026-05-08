@@ -8,7 +8,6 @@ export interface IEvent extends Document {
   type: string;
   image: string;
   status: string;
-  price: string;
   description?: string;
   itinerary?: string[];
   createdAt: Date;
@@ -23,7 +22,6 @@ const EventSchema: Schema = new Schema(
     type: { type: String, required: true },
     image: { type: String, required: true },
     status: { type: String, default: 'Applications Open' },
-    price: { type: String, required: true },
     description: { type: String },
     itinerary: { type: [String], default: [] },
   },

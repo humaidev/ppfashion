@@ -5,6 +5,7 @@ import User from '@/models/User';
 import Event from '@/models/Event';
 import EventApplication from '@/models/EventApplication';
 import { verifyToken } from '@/lib/jwt';
+import { sendEventApplicationEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -21,6 +22,9 @@ export async function POST(req: Request) {
 
     const user = await User.findById((decoded as any).id);
     if (!user) return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+
+    const event = await Event.findById(eventId);
+    if (!event) return NextResponse.json({ success: false, message: 'Event not found' }, { status: 404 });
 
     if (user.kycStatus !== 'APPROVED') {
       return NextResponse.json({ success: false, message: 'KYC approval required' }, { status: 403 });
@@ -40,6 +44,19 @@ export async function POST(req: Request) {
       event: eventId,
       designer: user._id,
     });
+
+    // Send confirmation email to designer
+    try {
+      await sendEventApplicationEmail(
+        user.email,
+        user.name,
+        event.title,
+        event.location,
+        event.startDate && event.endDate ? `${new Date(event.startDate).toLocaleDateString('en-GB')} - ${new Date(event.endDate).toLocaleDateString('en-GB')}` : 'To Be Announced'
+      );
+    } catch (emailErr) {
+      console.error("Email notification failed:", emailErr);
+    }
 
     return NextResponse.json({ success: true, message: 'Application submitted' });
   } catch (error: any) {

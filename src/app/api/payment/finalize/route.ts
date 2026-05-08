@@ -42,16 +42,18 @@ export async function POST(req: Request) {
       status: TransactionStatus.COMPLETED
     });
 
-    // 2. Update User Membership
+    // 2. Update User Membership with Card Info
+    const charge = (paymentIntent as any).charges?.data[0];
+    const cardInfo = charge?.payment_method_details?.card;
+
     const updatedUser = await User.findByIdAndUpdate(decoded.id, {
       "membership.plan": planName,
       "membership.status": 'ACTIVE',
       "membership.startDate": new Date(),
-      "membership.expiryDate": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-      "membership.cardLast4": (paymentIntent as any).charges?.data[0]?.payment_method_details?.card?.last4 || 'XXXX',
-      "membership.paymentMethod": (paymentIntent as any).charges?.data[0]?.payment_method_details?.card?.brand || 'Stripe',
-      membershipTier: 'PAID',
-      paymentStatus: 'PAID'
+      "membership.expiryDate": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year commitment
+      "membership.cardLast4": cardInfo?.last4 || 'XXXX',
+      "membership.paymentMethod": cardInfo?.brand || 'Stripe',
+      "membershipTier": 'PAID',
     }, { new: true });
 
     // 3. Dispatch Email

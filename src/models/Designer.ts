@@ -21,6 +21,7 @@ export interface IDesigner extends Document {
     selfieWithCnic?: string;
     license?: string;
   };
+  isFeatured: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,6 +46,7 @@ const DesignerSchema: Schema = new Schema(
     },
     bio: { type: String, required: true },
     collections: { type: [String], default: [] },
+    isFeatured: { type: Boolean, default: false },
     documents: {
       cnicFront: { type: String },
       cnicBack: { type: String },

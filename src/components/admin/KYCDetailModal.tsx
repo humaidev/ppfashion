@@ -34,41 +34,67 @@ export default function KYCDetailModal({ selectedKYC, setSelectedKYC, updateKYC,
             <h3 className="text-4xl font-serif font-bold text-white uppercase tracking-tighter italic">{selectedKYC.name}</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
-            <div className="space-y-8 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+            <div className="space-y-6 text-left">
                <div>
-                 <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Business / Brand Entity</p>
-                 <p className="text-lg font-serif italic text-white">{selectedKYC.kycData?.businessName}</p>
+                 <p className="text-[9px] uppercase tracking-widest text-white/20 font-bold mb-1">Brand Identity</p>
+                 <p className="text-xl font-serif italic text-white">{selectedKYC.kycData?.businessName || selectedKYC.businessName || 'Not Provided'}</p>
                </div>
-               <div>
-                 <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Artistic Category</p>
-                 <p className="text-sm font-bold text-primary-gold uppercase tracking-widest">{selectedKYC.kycData?.category}</p>
+               <div className="grid grid-cols-2 gap-6">
+                 <div>
+                   <p className="text-[9px] uppercase tracking-widest text-white/20 font-bold mb-1">Category</p>
+                   <p className="text-[11px] font-black text-primary-gold uppercase tracking-widest">{selectedKYC.kycData?.category || selectedKYC.specialty || 'N/A'}</p>
+                 </div>
+                 <div>
+                   <p className="text-[9px] uppercase tracking-widest text-white/20 font-bold mb-1">Experience</p>
+                   <p className="text-[11px] font-black text-white uppercase tracking-widest">{selectedKYC.kycData?.experience || selectedKYC.experience || '0'} Years</p>
+                 </div>
                </div>
-               <div>
-                 <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Industry Experience</p>
-                 <p className="text-sm font-bold text-white">{selectedKYC.kycData?.experience} Years</p>
+               <div className="pt-4 border-t border-white/5">
+                 <p className="text-[9px] uppercase tracking-widest text-white/20 font-bold mb-2">Legal Identity</p>
+                 <div className="space-y-3">
+                    <p className="text-xs text-white/60"><span className="text-white/30 mr-2">CNIC:</span> {selectedKYC.kycData?.cnic || selectedKYC.cnic || 'N/A'}</p>
+                    {selectedKYC.kycData?.passport && <p className="text-xs text-white/60"><span className="text-white/30 mr-2">Passport:</span> {selectedKYC.kycData.passport}</p>}
+                 </div>
                </div>
             </div>
-            <div className="space-y-8 text-left">
+            <div className="space-y-6 text-left">
                <div>
-                 <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Strategic Location</p>
-                 <p className="text-sm font-bold text-white uppercase tracking-widest">{selectedKYC.kycData?.city}</p>
+                 <p className="text-[9px] uppercase tracking-widest text-white/20 font-bold mb-1">Headquarters / City</p>
+                 <p className="text-sm font-bold text-white uppercase tracking-widest">{selectedKYC.kycData?.city || selectedKYC.location || 'Unknown'}</p>
                </div>
                <div>
-                 <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-2">Registered Address</p>
-                 <p className="text-xs text-white/60 leading-relaxed font-medium uppercase tracking-widest">{selectedKYC.kycData?.address}</p>
+                 <p className="text-[9px] uppercase tracking-widest text-white/20 font-bold mb-1">Registered Address</p>
+                 <p className="text-[10px] text-white/60 leading-relaxed font-medium uppercase tracking-widest">{selectedKYC.kycData?.address || selectedKYC.address || 'Not Provided'}</p>
                </div>
             </div>
+          </div>
+
+          {/* Portfolio Links Spotlight */}
+          <div className="mb-16 p-6 bg-white/[0.02] border border-white/5">
+             <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-6 text-left">Portfolio & Social Dossier</p>
+             <div className="flex flex-wrap gap-3">
+                {selectedKYC.kycData?.portfolioLinks && selectedKYC.kycData.portfolioLinks.length > 0 ? (
+                  selectedKYC.kycData.portfolioLinks.map((link: string, i: number) => (
+                    <a key={i} href={link.startsWith('http') ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-primary-gold/10 border border-primary-gold/20 text-primary-gold text-[10px] font-bold uppercase tracking-widest hover:bg-primary-gold hover:text-luxury-black transition-all">
+                      Link #{i + 1} ↗
+                    </a>
+                  ))
+                ) : (
+                  <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest italic">No external links provided</p>
+                )}
+             </div>
           </div>
 
           <div className="mb-16">
              <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-8 border-b border-white/5 pb-4 text-left">Verification Documents</p>
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { label: 'Identity Front', src: selectedKYC.kycData?.documents?.cnicFront },
-                  { label: 'Identity Back', src: selectedKYC.kycData?.documents?.cnicBack },
-                  { label: 'Security Selfie', src: selectedKYC.kycData?.documents?.selfieWithCnic },
-                ].map((doc) => (
+                 {[
+                   { label: 'Identity Front', src: selectedKYC.kycData?.documents?.cnicFront },
+                   { label: 'Identity Back', src: selectedKYC.kycData?.documents?.cnicBack },
+                   { label: 'Security Selfie', src: selectedKYC.kycData?.documents?.selfieWithCnic },
+                   { label: 'Trade License', src: selectedKYC.kycData?.documents?.license },
+                 ].map((doc) => (
                   <div key={doc.label} className="group relative">
                     <p className="text-[9px] uppercase tracking-widest text-white/40 mb-3 font-black text-left">{doc.label}</p>
                     <div className="aspect-[3/2] bg-white/5 border border-white/10 rounded-sm overflow-hidden hover:border-primary-gold transition-colors">

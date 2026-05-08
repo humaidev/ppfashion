@@ -13,11 +13,11 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Pakistani Passion for Fashion | Elite Designer Collective",
-  description: "The digital home for elite Pakistani fashion designers. Join the most exclusive fashion community in the UK.",
-  keywords: ["Pakistani Fashion", "South Asian Designers", "Fashion Show UK", "Designer Membership", "PPFF"],
+  title: "Passion for Pakistani Fashion | Elite Designer Collective",
+  description: "The digital home for elite Pakistani fashion designers. Join the most exclusive fashion community.",
+  keywords: ["Passion for Pakistani Fashion", "PPFashion", "South Asian Designers", "Fashion Show UK"],
   openGraph: {
-    title: "Pakistani Passion for Fashion | Elite Designer Collective",
+    title: "Passion for Pakistani Fashion | Elite Designer Collective",
     description: "The digital home for elite Pakistani fashion designers.",
     type: "website",
   },

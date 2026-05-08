@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import dbConnect from '@/lib/dbConnect';
 import User, { MembershipPlan } from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
+import { sendMembershipEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
     const decoded = verifyToken(userToken.value);
     if (!decoded) return NextResponse.json({ success: false, message: 'Invalid token' }, { status: 401 });
 
-    const { plan } = await req.json();
+    const { planName } = await req.json();
 
     const user = await User.findById((decoded as any).id);
     if (!user) return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
@@ -26,22 +27,28 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: 'KYC not approved' }, { status: 403 });
     }
 
+    const isRenewal = user.membership?.status === 'ACTIVE' || user.membership?.status === 'EXPIRED';
+
     // Update Membership (Mocking Stripe Success)
     const expiryDate = new Date();
-    if (plan === MembershipPlan.MONTHLY) {
-      expiryDate.setMonth(expiryDate.getMonth() + 1);
-    } else if (plan === MembershipPlan.YEARLY) {
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-    }
+    // Default to 1 month for now, or detect from planName if needed
+    expiryDate.setMonth(expiryDate.getMonth() + 1);
 
     user.membership = {
-      plan: plan as MembershipPlan,
+      plan: planName,
       status: 'ACTIVE',
       startDate: new Date(),
       expiryDate: expiryDate,
     };
 
     await user.save();
+
+    // Send Confirmation Email
+    try {
+      await sendMembershipEmail(user.email, user.name, planName, isRenewal ? 'RENEWED' : 'PURCHASED');
+    } catch (emailErr) {
+      console.error("Purchase email failed:", emailErr);
+    }
 
     return NextResponse.json({ success: true, message: 'Membership purchased' });
   } catch (error: any) {

@@ -13,21 +13,25 @@ export default function Footer() {
           {/* Brand Info */}
           <div className="lg:col-span-5">
             <Link href="/" className="inline-block mb-8 hover:opacity-80 transition-all origin-left">
-                <Image
-                  src="/logo.png"
-                  alt="PPFashion Logo"
-                  width={200}
-                  height={60}
-                  className="object-contain"
-                  unoptimized
-                />
+              <Image
+                src="/logo.png"
+                alt="PPFashion Logo"
+                width={200}
+                height={60}
+                className="object-contain"
+                unoptimized
+              />
             </Link>
             <p className="text-white/40 max-w-sm mb-10 leading-relaxed text-sm font-medium italic">
               Empowering the elite Pakistani fashion collective through exclusive networking and high-profile global showcases.
             </p>
             <div className="flex gap-6 mb-10">
-              {['Instagram', 'LinkedIn', 'Twitter'].map(social => (
-                <a key={social} href="#" className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/20 hover:text-primary-gold transition-colors">{social}</a>
+              {[
+                { name: 'Instagram', href: 'https://instagram.com/ppfashion' },
+                { name: 'LinkedIn', href: 'https://linkedin.com/company/ppfashion' },
+                { name: 'Twitter', href: 'https://twitter.com/ppfashion' }
+              ].map(social => (
+                <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/20 hover:text-primary-gold transition-colors">{social.name}</a>
               ))}
             </div>
             <Link
@@ -85,12 +89,12 @@ export default function Footer() {
         {/* Legal Bar */}
         <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <p className="text-white/20 text-[8px] font-bold uppercase tracking-[0.4em]">
-            &copy; {new Date().getFullYear()} Pakistani Passion for Fashion. International Rights Reserved.
+            &copy; {new Date().getFullYear()} Passion Pakistani Fashion. International Rights Reserved.
           </p>
           <div className="flex flex-wrap gap-6 text-white/10 text-[8px] font-bold uppercase tracking-[0.3em]">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Diversity</a>
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+            <span className="cursor-default">Diversity</span>
           </div>
         </div>
       </div>

@@ -42,9 +42,10 @@ export default async function EventDetailPage({ params }: { params: { id: string
                     <h1 className="text-5xl md:text-7xl font-serif font-bold text-white mb-4">{event.title}</h1>
                     <p className="text-primary-gold font-bold uppercase tracking-[0.3em] text-sm">{event.startDate} • {event.location}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-md p-8 border border-white/20">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/60 block mb-2 text-right">Investment</span>
-                    <div className="text-4xl font-serif font-bold text-white">{event.price}</div>
+                <div className="bg-white/10 backdrop-blur-md p-8 border border-white/20 text-right">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/60 block mb-2">Access Type</span>
+                    <div className="text-2xl font-serif font-bold text-primary-gold uppercase tracking-widest">Collective Elite</div>
+                    <p className="text-[9px] text-white/40 uppercase tracking-[0.2em] mt-2">Member Priority Access</p>
                 </div>
             </div>
         </div>
